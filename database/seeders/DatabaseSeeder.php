@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             // RolePermissionSeeder::class,
             AdminUserSeeder::class,
             ClientUserSeeder::class,
+            ProductSeeder::class,
+            ProjectSeeder::class,
         ]);
 
 

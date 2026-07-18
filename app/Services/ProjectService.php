@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Project;
+use App\Models\ProjectTimeline;
+use App\Models\Renewal;
+use App\Models\SupportTicket;
+use Illuminate\Support\Carbon;
+
+class ProjectService
+{
+    public function __construct(private RenewalService $renewalService)
+    {
+    }
+
+    public function createProject(array $data): Project
+    {
+        $project = Project::create([
+            ...$data,
+            'status' => 'active',
+            'current_stage' => 'documents',
+            'progress' => 0,
+        ]);
+
+        $project->load('product.documentFields', 'product.training');
+
+        foreach ($project->product->documentFields as $field) {
+            $project->documentValues()->create([
+                'document_field_id' => $field->id,
+                'status' => 'pending',
+            ]);
+        }
+
+        foreach ($project->product->training as $video) {
+            $project->trainingProgress()->create([
+                'training_id' => $video->id,
+                'completed' => false,
+            ]);
+        }
+
+        $project->timeline()->create([
+            'stage' => 'documents',
+            'completed' => false,
+            'percentage' => 0,
+        ]);
+
+        return $project;
+    }
+
+    public function advanceStage(Project $project, string $stage): Project
+    {
+        $stages = array_keys(Project::STAGES);
+        $targetIndex = array_search($stage, $stages, true);
+
+        abort_if($targetIndex === false, 422, 'Invalid stage.');
+
+        foreach ($stages as $index => $stageKey) {
+            if ($index < $targetIndex) {
+                ProjectTimeline::updateOrCreate(
+                    ['project_id' => $project->id, 'stage' => $stageKey],
+                    ['completed' => true, 'completed_at' => now(), 'percentage' => 100]
+                );
+            }
+        }
+
+        ProjectTimeline::updateOrCreate(
+            ['project_id' => $project->id, 'stage' => $stage],
+            ['completed' => false, 'percentage' => 0]
+        );
+
+        $project->update(['current_stage' => $stage]);
+
+        if ($stage === 'live') {
+            $project->update(['actual_live_date' => Carbon::today()]);
+            $this->renewalService->createForProject($project);
+        }
+
+        return $project->fresh();
+    }
+
+    public function toggleBlocked(Project $project): Project
+    {
+        $project->update(['status' => $project->status === 'blocked' ? 'active' : 'blocked']);
+
+        return $project->fresh();
+    }
+
+    public function getDashboardStats(): array
+    {
+        $projects = Project::with('documentValues')->get();
+
+        return [
+            'active_projects' => $projects->where('status', 'active')->count(),
+            'total_projects' => $projects->count(),
+            'documents_pending' => $projects->filter(function (Project $project) {
+                return $project->documentValues->contains(fn ($value) => $value->status !== 'approved');
+            })->count(),
+            'open_support_tickets' => SupportTicket::where('status', 'open')->count(),
+            'renewals_alert' => Renewal::all()->filter(
+                fn (Renewal $renewal) => in_array($this->renewalService->statusFor($renewal), ['expiring', 'expired'], true)
+            )->count(),
+        ];
+    }
+}

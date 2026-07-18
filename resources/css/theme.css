@@ -1,0 +1,45 @@
+/*
+ * Single source of truth for the app's color palette (white + blue theme).
+ * Change a value here and it updates everywhere `tailwind.config.js` maps
+ * these variables to utility classes (bg-primary, text-secondary, ...).
+ * Values are "R G B" triples so Tailwind can apply opacity modifiers.
+ */
+:root {
+    /* Brand / primary (buttons, active nav, links, focus rings) */
+    --color-primary: 37 99 235;       /* blue-600 */
+    --color-primary-dark: 29 78 216;  /* blue-700 */
+    --color-primary-light: 219 234 254; /* blue-100 */
+
+    /* Secondary (neutral surfaces, secondary buttons, borders) */
+    --color-secondary: 100 116 139;   /* slate-500 */
+    --color-secondary-dark: 51 65 85; /* slate-700 */
+    --color-secondary-light: 241 245 249; /* slate-100 */
+
+    /* Status colors */
+    --color-success: 22 163 74;   /* green-600 */
+    --color-success-light: 220 252 231; /* green-100 */
+    --color-danger: 220 38 38;    /* red-600 */
+    --color-danger-light: 254 226 226; /* red-100 */
+    --color-warning: 217 119 6;   /* amber-600 */
+    --color-warning-light: 254 243 199; /* amber-100 */
+
+    /* Surfaces */
+    --color-surface: 255 255 255;      /* white */
+    --color-surface-alt: 248 250 252;  /* slate-50 */
+    --color-border: 226 232 240;       /* slate-200 */
+
+    /* Sidebar */
+    --color-sidebar-bg: 255 255 255;
+    --color-sidebar-active-bg: 239 246 255;  /* blue-50 */
+    --color-sidebar-active-text: 37 99 235;  /* blue-600 */
+    --color-sidebar-text: 71 85 105;         /* slate-600 */
+
+    /* Chart categorical palette — fixed order, validated for CVD-safe
+     * adjacent-pair contrast (see dataviz skill). Don't reorder or reuse
+     * for status meaning; status already has its own colors above. */
+    --chart-cat-1: 42 120 214;   /* blue */
+    --chart-cat-2: 0 131 0;      /* green */
+    --chart-cat-3: 232 123 164;  /* magenta */
+    --chart-cat-4: 237 161 0;    /* yellow */
+    --chart-cat-5: 27 175 122;   /* aqua */
+}
