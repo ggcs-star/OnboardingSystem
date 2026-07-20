@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CustomizationRequestController;
+use App\Http\Controllers\Admin\CustomizationRequestOverviewController;
 use App\Http\Controllers\Admin\DocumentReviewController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductDocumentFieldController;
@@ -45,10 +47,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/projects/{project}/stage', [ProjectController::class, 'updateStage'])->name('projects.stage');
     Route::post('/projects/{project}/toggle-blocked', [ProjectController::class, 'toggleBlocked'])->name('projects.toggle-blocked');
     Route::patch('/projects/{project}/document-values/{documentValue}', [ProjectDocumentValueController::class, 'update'])->name('projects.document-values.update');
+    Route::patch('/projects/{project}/customization-requests/{customizationRequest}', [CustomizationRequestController::class, 'update'])->name('projects.customization-requests.update');
 
     Route::get('/documents', [DocumentReviewController::class, 'index'])->name('documents.index');
 
     Route::get('/training', [ProjectTrainingOverviewController::class, 'index'])->name('training.index');
+
+    Route::get('/customization-requests', [CustomizationRequestOverviewController::class, 'index'])->name('customization-requests.index');
 
     Route::get('/coming-soon/{label?}', function (?string $label = 'This section') {
         return view('admin.coming-soon', ['label' => $label]);

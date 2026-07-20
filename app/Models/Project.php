@@ -72,6 +72,11 @@ class Project extends Model
         return $this->hasMany(SupportTicket::class);
     }
 
+    public function customizationRequests(): HasMany
+    {
+        return $this->hasMany(CustomizationRequest::class)->latest();
+    }
+
     /**
      * [count submitted-or-approved, total] document fields for this project.
      */

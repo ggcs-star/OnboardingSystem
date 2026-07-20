@@ -60,7 +60,7 @@ class ProjectController extends Controller
         $project->load([
             'product.documentFields', 'product.training', 'product.policies',
             'client.trainingProgress', 'documentValues.documentField',
-            'timeline', 'renewal', 'tickets',
+            'timeline', 'renewal', 'tickets', 'customizationRequests.createdBy',
         ]);
 
         return view('admin.projects.show', [

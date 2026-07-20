@@ -41,6 +41,9 @@
                 <x-sidebar-link :href="route('client.training.index')" :active="request()->routeIs('client.training.*')" icon="play-circle">
                     <span x-show="!collapsed" x-cloak>Training</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('client.customization-requests.index')" :active="request()->routeIs('client.customization-requests.*')" icon="settings">
+                    <span x-show="!collapsed" x-cloak>Customization</span>
+                </x-sidebar-link>
             </div>
         </div>
     </nav>

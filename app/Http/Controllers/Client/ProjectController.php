@@ -34,6 +34,7 @@ class ProjectController extends Controller
             'training' => ['label' => 'Training', 'icon' => 'video'],
             'policies' => ['label' => 'Policies', 'icon' => 'shield'],
             'renewal' => ['label' => 'Renewal', 'icon' => 'refresh-cw'],
+            'customization' => ['label' => 'Customization', 'icon' => 'settings'],
         ];
 
         $activeTab = $request->query('tab', 'documents');
@@ -47,6 +48,7 @@ class ProjectController extends Controller
             'documentValues.documentField',
             'client.trainingProgress',
             'renewal',
+            'customizationRequests.reviewedBy',
         ]);
 
         return view('client.projects.show', [
