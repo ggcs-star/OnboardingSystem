@@ -3,6 +3,7 @@
         'documents' => ['label' => 'Documents', 'icon' => 'file-text'],
         'training' => ['label' => 'Training', 'icon' => 'video'],
         'renewal' => ['label' => 'Renewal', 'icon' => 'refresh-cw'],
+        'customization' => ['label' => 'Customization', 'icon' => 'settings'],
     ];
     $activeTab = request('tab', 'documents');
     if (! array_key_exists($activeTab, $tabs)) {

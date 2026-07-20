@@ -78,3 +78,18 @@ if (! function_exists('document_value_status_badge')) {
         };
     }
 }
+
+if (! function_exists('customization_status_badge')) {
+    /**
+     * Tailwind classes + label for a customization request's review status.
+     */
+    function customization_status_badge(string $status): array
+    {
+        return match ($status) {
+            'approved' => ['classes' => 'bg-success-light text-success', 'label' => 'Approved'],
+            'rejected' => ['classes' => 'bg-danger-light text-danger', 'label' => 'Rejected'],
+            'partial' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Partially Approved'],
+            default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Pending Review'],
+        };
+    }
+}

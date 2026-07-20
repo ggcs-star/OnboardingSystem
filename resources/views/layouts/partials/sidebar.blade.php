@@ -54,6 +54,9 @@
                 <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
                     <span x-show="!collapsed" x-cloak>Training</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.customization-requests.index')" :active="request()->routeIs('admin.customization-requests.*')" icon="settings">
+                    <span x-show="!collapsed" x-cloak>Customization</span>
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.documents.index')" :active="request()->routeIs('admin.documents.*')" icon="file-text">
                     <span x-show="!collapsed" x-cloak>Documents</span>
                 </x-sidebar-link>

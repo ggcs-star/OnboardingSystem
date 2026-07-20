@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\CustomizationRequestController;
 use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\DocumentValueController;
 use App\Http\Controllers\Client\ProjectController;
@@ -13,6 +14,9 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
 
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
 
+    Route::get('/customization-requests', [CustomizationRequestController::class, 'index'])->name('customization-requests.index');
+    Route::post('/customization-requests', [CustomizationRequestController::class, 'storeAny'])->name('customization-requests.store');
+
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
@@ -21,4 +25,7 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
 
     Route::patch('/training-progress/{training}', [TrainingProgressController::class, 'update'])
         ->name('training-progress.update');
+
+    Route::post('/projects/{project}/customization-requests', [CustomizationRequestController::class, 'store'])
+        ->name('projects.customization-requests.store');
 });
