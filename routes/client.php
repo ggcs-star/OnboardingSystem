@@ -19,6 +19,6 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::patch('/projects/{project}/document-values/{documentValue}', [DocumentValueController::class, 'update'])
         ->name('projects.document-values.update');
 
-    Route::patch('/projects/{project}/training-progress/{trainingProgress}', [TrainingProgressController::class, 'update'])
-        ->name('projects.training-progress.update');
+    Route::patch('/training-progress/{training}', [TrainingProgressController::class, 'update'])
+        ->name('training-progress.update');
 });

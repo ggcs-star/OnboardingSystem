@@ -18,7 +18,7 @@ class DashboardController extends Controller
 
     public function index(): View
     {
-        $projects = Project::with(['product', 'client', 'trainingProgress'])->get();
+        $projects = Project::with(['product.training', 'client.trainingProgress'])->get();
 
         $stageCounts = collect(Project::STAGES)->map(
             fn ($label, $key) => ['label' => $label, 'value' => $projects->where('current_stage', $key)->count()]
@@ -35,13 +35,15 @@ class DashboardController extends Controller
             fn ($status) => ['status' => $status, 'count' => ProjectDocumentValue::where('status', $status)->count()]
         );
 
-        $recentProjects = Project::with(['product', 'client'])->latest()->take(6)->get();
+        $recentProjects = Project::with(['product.training', 'client.trainingProgress'])->latest()->take(6)->get();
 
         $trainingByClient = $projects
             ->groupBy(fn (Project $project) => $project->client->company_name)
             ->map(function ($clientProjects, $companyName) {
-                $done = $clientProjects->flatMap->trainingProgress->where('completed', true)->count();
-                $total = $clientProjects->flatMap->trainingProgress->count();
+                $client = $clientProjects->first()->client;
+                $trainingIds = $clientProjects->pluck('product.training')->flatten()->pluck('id')->unique();
+                $total = $trainingIds->count();
+                $done = $client->trainingProgress->whereIn('training_id', $trainingIds)->where('completed', true)->count();
                 $pct = $total > 0 ? round($done / $total * 100) : 0;
 
                 return ['label' => $companyName, 'value' => $pct, 'done' => $done, 'total' => $total];

@@ -23,7 +23,7 @@ class ProjectService
             'progress' => 0,
         ]);
 
-        $project->load('product.documentFields', 'product.training');
+        $project->load('product.documentFields', 'product.training', 'client');
 
         foreach ($project->product->documentFields as $field) {
             $project->documentValues()->create([
@@ -33,8 +33,9 @@ class ProjectService
         }
 
         foreach ($project->product->training as $video) {
-            $project->trainingProgress()->create([
+            $project->client->trainingProgress()->firstOrCreate([
                 'training_id' => $video->id,
+            ], [
                 'completed' => false,
             ]);
         }

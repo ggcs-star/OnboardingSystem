@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $client = $request->user()->client;
 
         $projects = $client
-            ? $client->projects()->with(['product', 'documentValues', 'trainingProgress', 'tickets'])->latest()->get()
+            ? $client->projects()->with(['product.training', 'documentValues', 'client.trainingProgress', 'tickets'])->latest()->get()
             : collect();
 
         $docsDone = 0;

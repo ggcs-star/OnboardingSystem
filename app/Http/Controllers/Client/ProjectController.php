@@ -19,7 +19,7 @@ class ProjectController extends Controller
         $client = $request->user()->client;
 
         $projects = $client
-            ? $client->projects()->with(['product', 'documentValues', 'trainingProgress'])->latest()->get()
+            ? $client->projects()->with(['product.training', 'documentValues', 'client.trainingProgress'])->latest()->get()
             : collect();
 
         return view('client.projects.index', ['projects' => $projects]);
@@ -43,8 +43,9 @@ class ProjectController extends Controller
 
         $project->load([
             'product.policies',
+            'product.training',
             'documentValues.documentField',
-            'trainingProgress.training',
+            'client.trainingProgress',
             'renewal',
         ]);
 

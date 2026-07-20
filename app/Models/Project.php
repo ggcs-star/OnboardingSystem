@@ -62,11 +62,6 @@ class Project extends Model
         return $this->hasMany(ProjectDocumentValue::class);
     }
 
-    public function trainingProgress(): HasMany
-    {
-        return $this->hasMany(ProjectTrainingProgress::class);
-    }
-
     public function renewal(): HasOne
     {
         return $this->hasOne(Renewal::class);
@@ -89,12 +84,31 @@ class Project extends Model
     }
 
     /**
-     * [count completed, total] training videos for this project.
+     * Training videos are shared across all of a client's projects for the
+     * same product, so this looks up progress on the client, not the project.
+     */
+    public function trainingProgressFor(ProductTraining $video): ?ClientTrainingProgress
+    {
+        return $this->client->trainingProgress->firstWhere('training_id', $video->id);
+    }
+
+    /**
+     * [count completed, total] training videos for this project's product,
+     * counted against the client's shared progress (not project-scoped).
      */
     public function trainingProgressCount(): array
     {
-        $total = $this->trainingProgress->count();
-        $done = $this->trainingProgress->where('completed', true)->count();
+        $trainingIds = $this->product->training->pluck('id');
+        $total = $trainingIds->count();
+
+        if ($total === 0) {
+            return [0, 0];
+        }
+
+        $done = $this->client->trainingProgress
+            ->whereIn('training_id', $trainingIds)
+            ->where('completed', true)
+            ->count();
 
         return [$done, $total];
     }

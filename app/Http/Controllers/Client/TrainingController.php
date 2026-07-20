@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -12,10 +13,17 @@ class TrainingController extends Controller
     {
         $client = $request->user()->client;
 
-        $projects = $client
-            ? $client->projects()->with(['product', 'trainingProgress.training'])->latest()->get()
-            : collect();
+        if (! $client) {
+            return view('client.training.index', ['products' => collect(), 'client' => null]);
+        }
 
-        return view('client.training.index', ['projects' => $projects]);
+        $products = Product::with('training')
+            ->where('active', true)
+            ->orderBy('name')
+            ->get();
+
+        $client->load('trainingProgress');
+
+        return view('client.training.index', ['products' => $products, 'client' => $client]);
     }
 }
