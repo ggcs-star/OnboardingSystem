@@ -120,7 +120,8 @@ class ProjectSeeder extends Seeder
             }
         }
 
-        $progress = $project->trainingProgress()->orderBy('id')->get();
+        $trainingIds = $project->product->training->pluck('id');
+        $progress = $project->client->trainingProgress()->whereIn('training_id', $trainingIds)->orderBy('id')->get();
         $completeCount = match ($trainingLevel) {
             'all' => $progress->count(),
             'some' => (int) ceil($progress->count() * 0.5),

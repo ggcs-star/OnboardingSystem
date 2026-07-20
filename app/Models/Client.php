@@ -32,4 +32,9 @@ class Client extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    public function trainingProgress(): HasMany
+    {
+        return $this->hasMany(ClientTrainingProgress::class);
+    }
 }

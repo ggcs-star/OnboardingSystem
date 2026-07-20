@@ -25,7 +25,7 @@ class ProjectController extends Controller
 
     public function index(Request $request): View
     {
-        $projects = Project::with(['product.documentFields', 'client', 'documentValues', 'trainingProgress', 'renewal', 'tickets'])
+        $projects = Project::with(['product.documentFields', 'product.training', 'client.trainingProgress', 'documentValues', 'renewal', 'tickets'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -59,7 +59,7 @@ class ProjectController extends Controller
     {
         $project->load([
             'product.documentFields', 'product.training', 'product.policies',
-            'client', 'documentValues.documentField', 'trainingProgress.training',
+            'client.trainingProgress', 'documentValues.documentField',
             'timeline', 'renewal', 'tickets',
         ]);
 
