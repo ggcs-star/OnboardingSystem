@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'tagline',
+        'category',
+        'introduction',
+        'image',
+        'active',
+    ];
+
+    protected $casts = [
+        'active' => 'boolean',
+    ];
+
+    public function documentFields(): HasMany
+    {
+        return $this->hasMany(ProductDocumentField::class)->ordered();
+    }
+
+    public function training(): HasMany
+    {
+        return $this->hasMany(ProductTraining::class)->ordered();
+    }
+
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(ProductFaq::class)->orderBy('id');
+    }
+
+    public function policies(): HasMany
+    {
+        return $this->hasMany(ProductPolicy::class);
+    }
+
+    public function renewalSetting(): HasOne
+    {
+        return $this->hasOne(ProductRenewalSetting::class);
+    }
+
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function projectsCount(): int
+    {
+        return $this->projects()->count();
+    }
+
+    public function clientsCount(): int
+    {
+        return $this->projects()->distinct('client_id')->count('client_id');
+    }
+
+    public function imageUrl(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
+}
