@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRenewalSettingRequest extends FormRequest
+class StoreSubscriptionPlanRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,8 +14,9 @@ class UpdateRenewalSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reminder_before_days' => ['nullable', 'integer', 'min:0'],
-            'auto_renew_reminder' => ['nullable', 'boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'duration_months' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'numeric', 'min:0'],
         ];
     }
 }

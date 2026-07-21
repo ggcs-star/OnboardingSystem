@@ -19,7 +19,7 @@ class ProjectController extends Controller
         $client = $request->user()->client;
 
         $projects = $client
-            ? $client->projects()->with(['product.training', 'documentValues', 'client.trainingProgress'])->latest()->get()
+            ? $client->projects()->with(['product.training', 'client.trainingProgress'])->latest()->get()
             : collect();
 
         return view('client.projects.index', ['projects' => $projects]);
@@ -33,7 +33,7 @@ class ProjectController extends Controller
             'documents' => ['label' => 'Documents', 'icon' => 'file-text'],
             'training' => ['label' => 'Training', 'icon' => 'video'],
             'policies' => ['label' => 'Policies', 'icon' => 'shield'],
-            'renewal' => ['label' => 'Renewal', 'icon' => 'refresh-cw'],
+            'renewal' => ['label' => 'Subscription', 'icon' => 'refresh-cw'],
             'customization' => ['label' => 'Customization', 'icon' => 'settings'],
         ];
 
@@ -45,9 +45,8 @@ class ProjectController extends Controller
         $project->load([
             'product.policies',
             'product.training',
-            'documentValues.documentField',
             'client.trainingProgress',
-            'renewal',
+            'renewal.history',
             'customizationRequests.reviewedBy',
         ]);
 

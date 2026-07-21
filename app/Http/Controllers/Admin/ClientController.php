@@ -5,20 +5,24 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreClientRequest;
 use App\Models\Client;
+use App\Models\Project;
 use App\Services\ClientService;
+use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ClientController extends Controller
 {
-    public function __construct(private ClientService $clientService)
-    {
+    public function __construct(
+        private ClientService $clientService,
+        private RenewalService $renewalService,
+    ) {
     }
 
     public function index(Request $request): View
     {
-        $clients = Client::with(['user', 'projects.documentValues', 'projects.tickets'])
+        $clients = Client::with(['user', 'projects'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -40,5 +44,48 @@ class ClientController extends Controller
         $this->clientService->createClient($request->validated());
 
         return redirect()->route('admin.clients.index')->with('success', 'Client added successfully.');
+    }
+
+    public function show(Request $request, Client $client): View
+    {
+        $client->load(['user', 'projects.product', 'projects.renewal.history']);
+
+        $tabs = ['overview', 'documents'];
+        $activeTab = $request->query('tab', 'overview');
+        if (! in_array($activeTab, $tabs, true)) {
+            $activeTab = 'overview';
+        }
+
+        $products = $client->projects->map(function (Project $project) {
+            $groups = $project->documentEntries()
+                ->groupBy('group_slug')
+                ->map(fn ($groupEntries) => (object) [
+                    'label' => $groupEntries->first()->group_label,
+                    'mandatory' => $groupEntries->first()->group_mandatory,
+                    'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
+                        $entry->project = $project;
+
+                        return $entry;
+                    }),
+                    'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                ]);
+
+            return (object) [
+                'project' => $project,
+                'groups' => $groups,
+                'pending' => $groups->sum('pending'),
+            ];
+        });
+
+        $renewalStatuses = $client->projects->mapWithKeys(
+            fn (Project $project) => [$project->id => $this->renewalService->statusFor($project->renewal)]
+        );
+
+        return view('admin.clients.show', [
+            'client' => $client,
+            'activeTab' => $activeTab,
+            'products' => $products,
+            'renewalStatuses' => $renewalStatuses,
+        ]);
     }
 }

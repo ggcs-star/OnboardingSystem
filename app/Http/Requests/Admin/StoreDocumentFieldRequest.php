@@ -15,6 +15,10 @@ class StoreDocumentFieldRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'product_document_group_id' => [
+                'required',
+                Rule::exists('product_document_groups', 'id')->where('product_id', $this->route('product')->id),
+            ],
             'label' => ['required', 'string', 'max:255'],
             'field_type' => ['required', Rule::in(['text', 'number', 'image', 'pdf', 'key'])],
             'placeholder' => ['nullable', 'string', 'max:255'],

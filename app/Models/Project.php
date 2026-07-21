@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 
 class Project extends Model
 {
@@ -20,6 +21,8 @@ class Project extends Model
         'live' => 'Live',
     ];
 
+    public const DOCUMENT_STATUSES = ['pending', 'submitted', 'approved', 'rejected'];
+
     protected $fillable = [
         'product_id',
         'client_id',
@@ -30,11 +33,13 @@ class Project extends Model
         'current_stage',
         'progress',
         'assigned_manager',
+        'documents',
     ];
 
     protected $casts = [
         'expected_live_date' => 'date',
         'actual_live_date' => 'date',
+        'documents' => 'array',
     ];
 
     public function product(): BelongsTo
@@ -57,11 +62,6 @@ class Project extends Model
         return $this->hasMany(ProjectTimeline::class)->orderBy('id');
     }
 
-    public function documentValues(): HasMany
-    {
-        return $this->hasMany(ProjectDocumentValue::class);
-    }
-
     public function renewal(): HasOne
     {
         return $this->hasOne(Renewal::class);
@@ -78,14 +78,66 @@ class Project extends Model
     }
 
     /**
+     * Flattens the `documents` JSON column into one object per field, each
+     * carrying its group_slug/group_label alongside the field's own data.
+     */
+    public function documentEntries(): Collection
+    {
+        $entries = collect();
+
+        foreach (($this->documents ?? []) as $groupSlug => $group) {
+            foreach (($group['fields'] ?? []) as $fieldKey => $field) {
+                $entries->push((object) array_merge($field, [
+                    'group_slug' => $groupSlug,
+                    'group_label' => $group['label'] ?? $groupSlug,
+                    'group_mandatory' => $group['mandatory'] ?? false,
+                    'field_key' => $fieldKey,
+                ]));
+            }
+        }
+
+        return $entries;
+    }
+
+    /**
      * [count submitted-or-approved, total] document fields for this project.
      */
     public function documentsProgress(): array
     {
-        $total = $this->documentValues->count();
-        $done = $this->documentValues->whereIn('status', ['submitted', 'approved'])->count();
+        $entries = $this->documentEntries();
+        $total = $entries->count();
+        $done = $entries->whereIn('status', ['submitted', 'approved'])->count();
 
         return [$done, $total];
+    }
+
+    /**
+     * [count submitted-or-approved, total] required fields within groups
+     * flagged mandatory-for-onboarding — used to decide whether onboarding
+     * can be considered complete.
+     */
+    public function mandatoryDocumentsProgress(): array
+    {
+        $entries = $this->documentEntries()->where('group_mandatory', true)->where('required', true);
+        $total = $entries->count();
+        $done = $entries->whereIn('status', ['submitted', 'approved'])->count();
+
+        return [$done, $total];
+    }
+
+    public function isOnboardingComplete(): bool
+    {
+        [$done, $total] = $this->mandatoryDocumentsProgress();
+
+        if ($done !== $total) {
+            return false;
+        }
+
+        if ($this->product->subscriptionPlans()->doesntExist()) {
+            return true;
+        }
+
+        return (bool) $this->renewal?->go_live_date;
     }
 
     /**

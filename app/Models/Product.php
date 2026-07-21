@@ -29,6 +29,11 @@ class Product extends Model
         return $this->hasMany(ProductDocumentField::class)->ordered();
     }
 
+    public function documentGroups(): HasMany
+    {
+        return $this->hasMany(ProductDocumentGroup::class)->ordered()->with('fields');
+    }
+
     public function training(): HasMany
     {
         return $this->hasMany(ProductTraining::class)->ordered();
@@ -47,6 +52,11 @@ class Product extends Model
     public function renewalSetting(): HasOne
     {
         return $this->hasOne(ProductRenewalSetting::class);
+    }
+
+    public function subscriptionPlans(): HasMany
+    {
+        return $this->hasMany(ProductSubscriptionPlan::class)->ordered();
     }
 
     public function projects(): HasMany

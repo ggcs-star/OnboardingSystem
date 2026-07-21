@@ -20,10 +20,11 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($localPulse);
 
-        $localPulse->documentFields()->createMany([
+        $this->seedDocumentGroups($localPulse, [
             ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG, min 200x200px)', 'required' => true],
             ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
             ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. samacharcity.in', 'required' => true],
+        ], [
             ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
             ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
             ['label' => 'Google Map API Key', 'field_key' => 'google_map_api_key', 'field_type' => 'key', 'placeholder' => 'AIza...', 'required' => false],
@@ -55,11 +56,12 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($restaurantPos);
 
-        $restaurantPos->documentFields()->createMany([
+        $this->seedDocumentGroups($restaurantPos, [
             ['label' => 'Restaurant Logo', 'field_key' => 'restaurant_logo', 'field_type' => 'image', 'placeholder' => 'Upload restaurant logo (PNG/JPG)', 'required' => true],
             ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
             ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
             ['label' => 'Menu PDF', 'field_key' => 'menu_pdf', 'field_type' => 'pdf', 'placeholder' => 'Upload current menu as PDF', 'required' => false],
+        ], [
             ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => true],
         ]);
 
@@ -87,11 +89,12 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($schoolErp);
 
-        $schoolErp->documentFields()->createMany([
+        $this->seedDocumentGroups($schoolErp, [
             ['label' => 'School Logo', 'field_key' => 'school_logo', 'field_type' => 'image', 'placeholder' => 'Upload school logo (PNG/JPG)', 'required' => true],
             ['label' => 'School Registration Number', 'field_key' => 'school_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. SCH/2020/00123', 'required' => true],
             ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. myschool.edu.in', 'required' => true],
             ['label' => 'Affiliation Certificate', 'field_key' => 'affiliation_certificate', 'field_type' => 'pdf', 'placeholder' => 'Upload board affiliation certificate', 'required' => true],
+        ], [
             ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
             ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
             ['label' => 'SMS Gateway Key', 'field_key' => 'sms_gateway_key', 'field_type' => 'key', 'placeholder' => 'API key for SMS notifications', 'required' => false],
@@ -124,11 +127,12 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($restaurantRevenue);
 
-        $restaurantRevenue->documentFields()->createMany([
+        $this->seedDocumentGroups($restaurantRevenue, [
             ['label' => 'Brand Logo', 'field_key' => 'brand_logo', 'field_type' => 'image', 'placeholder' => 'Upload brand logo (PNG/JPG)', 'required' => true],
             ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
             ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
             ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => true],
+        ], [
             ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
         ]);
 
@@ -154,11 +158,12 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($realEstate);
 
-        $realEstate->documentFields()->createMany([
+        $this->seedDocumentGroups($realEstate, [
             ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG)', 'required' => true],
             ['label' => 'RERA Registration Number', 'field_key' => 'rera_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. PR/GJ/RAJKOT/1234/2026', 'required' => true],
             ['label' => 'Company PAN', 'field_key' => 'company_pan', 'field_type' => 'text', 'placeholder' => 'e.g. ABCDE1234F', 'required' => true],
             ['label' => 'Office Address Proof', 'field_key' => 'office_address_proof', 'field_type' => 'pdf', 'placeholder' => 'Upload office address proof', 'required' => true],
+        ], [
             ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => false],
         ]);
 
@@ -184,10 +189,11 @@ class ProductSeeder extends Seeder
 
         $this->seedDefaultPolicies($rapidRetail);
 
-        $rapidRetail->documentFields()->createMany([
+        $this->seedDocumentGroups($rapidRetail, [
             ['label' => 'Store Logo', 'field_key' => 'store_logo', 'field_type' => 'image', 'placeholder' => 'Upload store logo (PNG/JPG)', 'required' => true],
             ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
             ['label' => 'Trade License', 'field_key' => 'trade_license', 'field_type' => 'pdf', 'placeholder' => 'Upload trade license', 'required' => true],
+        ], [
             ['label' => 'POS Terminal Key', 'field_key' => 'pos_terminal_key', 'field_type' => 'key', 'placeholder' => 'Terminal ID and activation key', 'required' => true],
             ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
         ]);
@@ -207,6 +213,26 @@ class ProductSeeder extends Seeder
         // Clients & Projects are seeded separately in ProjectSeeder, using
         // ClientService/ProjectService so they get real logins, document
         // templates, training progress, timelines and renewals.
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $billingFields
+     * @param array<int, array<string, mixed>> $developmentFields
+     */
+    private function seedDocumentGroups(Product $product, array $billingFields, array $developmentFields): void
+    {
+        $billing = $product->documentGroups()->create(['name' => 'Billing', 'slug' => 'billing']);
+        $development = $product->documentGroups()->create(['name' => 'Development', 'slug' => 'development']);
+
+        $product->documentFields()->createMany(array_map(
+            fn (array $field) => [...$field, 'product_document_group_id' => $billing->id],
+            $billingFields
+        ));
+
+        $product->documentFields()->createMany(array_map(
+            fn (array $field) => [...$field, 'product_document_group_id' => $development->id],
+            $developmentFields
+        ));
     }
 
     private function seedDefaultPolicies(Product $product): void

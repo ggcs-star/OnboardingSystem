@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Product;
 use App\Models\Project;
-use App\Models\ProjectDocumentValue;
 use App\Services\ProjectService;
 use Illuminate\View\View;
 
@@ -31,8 +30,8 @@ class DashboardController extends Controller
             ->filter(fn ($row) => $row['value'] > 0)
             ->values();
 
-        $documentStatusCounts = collect(ProjectDocumentValue::STATUSES)->map(
-            fn ($status) => ['status' => $status, 'count' => ProjectDocumentValue::where('status', $status)->count()]
+        $documentStatusCounts = collect(Project::DOCUMENT_STATUSES)->map(
+            fn ($status) => ['status' => $status, 'count' => $projects->flatMap->documentEntries()->where('status', $status)->count()]
         );
 
         $recentProjects = Project::with(['product.training', 'client.trainingProgress'])->latest()->take(6)->get();

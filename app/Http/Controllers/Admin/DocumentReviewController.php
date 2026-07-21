@@ -4,40 +4,98 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\ProjectDocumentValue;
+use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 class DocumentReviewController extends Controller
 {
     public function index(Request $request): View
     {
-        $baseQuery = ProjectDocumentValue::query();
+        $projects = Project::with(['client', 'product'])->get();
 
-        $values = ProjectDocumentValue::with(['project.client', 'project.product', 'documentField'])
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $search = $request->string('search');
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('project', fn ($p) => $p->where('project_name', 'like', "%{$search}%")
-                        ->orWhereHas('client', fn ($c) => $c->where('company_name', 'like', "%{$search}%")))
-                        ->orWhereHas('documentField', fn ($f) => $f->where('label', 'like', "%{$search}%"));
+        $allEntries = $projects->flatMap(function (Project $project) {
+            return $project->documentEntries()->map(function ($entry) use ($project) {
+                $entry->project = $project;
+
+                return $entry;
+            });
+        });
+
+        $entries = $allEntries
+            ->when($request->filled('search'), function ($collection) use ($request) {
+                $search = mb_strtolower($request->string('search'));
+
+                return $collection->filter(function ($entry) use ($search) {
+                    return str_contains(mb_strtolower($entry->project->project_name), $search)
+                        || str_contains(mb_strtolower($entry->project->client->company_name), $search)
+                        || str_contains(mb_strtolower($entry->label), $search);
                 });
             })
-            ->when($request->filled('product'), fn ($query) => $query->whereHas('project', fn ($p) => $p->where('product_id', $request->integer('product'))))
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+            ->when($request->filled('product'), fn ($collection) => $collection->filter(
+                fn ($entry) => $entry->project->product_id === $request->integer('product')
+            ))
+            ->when($request->filled('status'), fn ($collection) => $collection->filter(
+                fn ($entry) => $entry->status === $request->string('status')->value()
+            ));
+
+        $clients = $entries
+            ->groupBy(fn ($entry) => $entry->project->client_id)
+            ->map(function ($clientEntries) {
+                $client = $clientEntries->first()->project->client;
+
+                $products = $clientEntries
+                    ->groupBy(fn ($entry) => $entry->project->id)
+                    ->map(function ($projectEntries) {
+                        $project = $projectEntries->first()->project;
+
+                        $groups = $projectEntries
+                            ->groupBy('group_slug')
+                            ->map(fn ($groupEntries) => (object) [
+                                'label' => $groupEntries->first()->group_label,
+                                'mandatory' => $groupEntries->first()->group_mandatory,
+                                'entries' => $groupEntries->values(),
+                                'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                            ]);
+
+                        return (object) [
+                            'project' => $project,
+                            'groups' => $groups,
+                            'pending' => $projectEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                        ];
+                    })
+                    ->values();
+
+                return (object) [
+                    'client' => $client,
+                    'products' => $products,
+                    'pending' => $clientEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                ];
+            })
+            ->sortBy(fn ($row) => $row->client->company_name)
+            ->values();
+
+        $perPage = 10;
+        $page = $request->integer('page', 1);
+
+        $clientsPage = new LengthAwarePaginator(
+            $clients->forPage($page, $perPage),
+            $clients->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('admin.documents.index', [
-            'values' => $values,
+            'clients' => $clientsPage,
             'products' => Product::orderBy('name')->get(),
             'stats' => [
-                'total_fields' => (clone $baseQuery)->count(),
-                'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
-                'submitted' => (clone $baseQuery)->where('status', 'submitted')->count(),
-                'approved' => (clone $baseQuery)->where('status', 'approved')->count(),
-                'rejected' => (clone $baseQuery)->where('status', 'rejected')->count(),
+                'total_fields' => $allEntries->count(),
+                'pending' => $allEntries->where('status', 'pending')->count(),
+                'submitted' => $allEntries->where('status', 'submitted')->count(),
+                'approved' => $allEntries->where('status', 'approved')->count(),
+                'rejected' => $allEntries->where('status', 'rejected')->count(),
             ],
         ]);
     }

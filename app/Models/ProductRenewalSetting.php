@@ -12,15 +12,12 @@ class ProductRenewalSetting extends Model
 
     protected $fillable = [
         'product_id',
-        'default_plan_duration_months',
-        'default_renewal_amount',
         'reminder_before_days',
         'auto_renew_reminder',
     ];
 
     protected $casts = [
         'auto_renew_reminder' => 'boolean',
-        'default_renewal_amount' => 'decimal:2',
     ];
 
     public function product(): BelongsTo

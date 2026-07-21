@@ -6,7 +6,9 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\SupportTicket;
+use App\Models\User;
 use App\Services\ClientService;
+use App\Services\ProjectDocumentService;
 use App\Services\ProjectService;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +18,8 @@ class ProjectSeeder extends Seeder
     {
         $clientService = app(ClientService::class);
         $projectService = app(ProjectService::class);
+        $projectDocumentService = app(ProjectDocumentService::class);
+        $adminId = User::role('admin')->value('id');
 
         $clients = [];
         foreach ($this->clientsData() as $key => $data) {
@@ -63,7 +67,7 @@ class ProjectSeeder extends Seeder
                 'expected_live_date' => now()->addMonths(1),
             ]);
 
-            $this->markProgress($project, $data['docs'], $data['training']);
+            $this->markProgress($projectDocumentService, $adminId, $project, $data['docs'], $data['training']);
 
             $projectService->advanceStage($project, $data['stage']);
 
@@ -102,21 +106,22 @@ class ProjectSeeder extends Seeder
         return ['stage' => $stage, ...$levelsByStage[$stage]];
     }
 
-    private function markProgress(Project $project, string $docsLevel, string $trainingLevel): void
+    private function markProgress(ProjectDocumentService $projectDocumentService, ?int $adminId, Project $project, string $docsLevel, string $trainingLevel): void
     {
-        $values = $project->documentValues()->orderBy('id')->get();
+        $entries = $project->documentEntries();
         $approveCount = match ($docsLevel) {
-            'all' => $values->count(),
-            'most' => (int) ceil($values->count() * 0.85),
-            'few' => (int) floor($values->count() * 0.3),
+            'all' => $entries->count(),
+            'most' => (int) ceil($entries->count() * 0.85),
+            'few' => (int) floor($entries->count() * 0.3),
             default => 0,
         };
 
-        foreach ($values as $index => $value) {
+        foreach ($entries as $index => $entry) {
             if ($index < $approveCount) {
-                $value->update(['value' => 'Sample submitted value', 'status' => 'approved', 'approved_at' => now()]);
-            } elseif ($docsLevel !== 'none' && $index === $approveCount && $approveCount < $values->count()) {
-                $value->update(['value' => 'Awaiting review', 'status' => 'submitted']);
+                $projectDocumentService->submit($project, $entry->group_slug, $entry->field_key, 'Sample submitted value', null);
+                $projectDocumentService->review($project, $entry->group_slug, $entry->field_key, 'approved', null, $adminId ?? 0);
+            } elseif ($docsLevel !== 'none' && $index === $approveCount && $approveCount < $entries->count()) {
+                $projectDocumentService->submit($project, $entry->group_slug, $entry->field_key, 'Awaiting review', null);
             }
         }
 

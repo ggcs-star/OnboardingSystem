@@ -3,6 +3,7 @@
 use App\Http\Controllers\Client\CustomizationRequestController;
 use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\DocumentValueController;
+use App\Http\Controllers\Client\OnboardingController;
 use App\Http\Controllers\Client\ProjectController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Client\TrainingProgressController;
@@ -12,6 +13,13 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding/{product}', [OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::get('/onboarding/{project}/documents', [OnboardingController::class, 'documents'])->name('onboarding.documents');
+    Route::get('/onboarding/{project}/subscription', [OnboardingController::class, 'subscription'])->name('onboarding.subscription');
+    Route::post('/onboarding/{project}/subscription/plan', [OnboardingController::class, 'selectPlan'])->name('onboarding.subscription.plan');
+    Route::post('/onboarding/{project}/subscription/payment', [OnboardingController::class, 'recordPayment'])->name('onboarding.subscription.payment');
+
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
 
     Route::get('/customization-requests', [CustomizationRequestController::class, 'index'])->name('customization-requests.index');
@@ -20,8 +28,8 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
-    Route::patch('/projects/{project}/document-values/{documentValue}', [DocumentValueController::class, 'update'])
-        ->name('projects.document-values.update');
+    Route::patch('/projects/{project}/documents/{group}/{field}', [DocumentValueController::class, 'update'])
+        ->name('projects.documents.update');
 
     Route::patch('/training-progress/{training}', [TrainingProgressController::class, 'update'])
         ->name('training-progress.update');

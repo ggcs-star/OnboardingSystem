@@ -2,10 +2,9 @@
     $tabs = [
         'product-details' => ['label' => 'Product Details', 'icon' => 'box'],
         'document-fields' => ['label' => 'Document Fields', 'icon' => 'file-text'],
-        'training-videos' => ['label' => 'Training Videos', 'icon' => 'video'],
         'policies' => ['label' => 'Policies', 'icon' => 'shield'],
         'faqs' => ['label' => 'FAQs', 'icon' => 'help-circle'],
-        'renewal-settings' => ['label' => 'Renewal Settings', 'icon' => 'refresh-cw'],
+        'renewal-settings' => ['label' => 'Subscriptions', 'icon' => 'refresh-cw'],
     ];
 @endphp
 

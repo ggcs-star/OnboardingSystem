@@ -30,9 +30,6 @@
                 <x-sidebar-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" icon="grid">
                     <span x-show="!collapsed" x-cloak>Dashboard</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')" icon="folder">
-                    <span x-show="!collapsed" x-cloak>Projects</span>
-                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.clients.index')" :active="request()->routeIs('admin.clients.*')" icon="users">
                     <span x-show="!collapsed" x-cloak>Clients</span>
                 </x-sidebar-link>
@@ -56,9 +53,6 @@
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.customization-requests.index')" :active="request()->routeIs('admin.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>
-                </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.documents.index')" :active="request()->routeIs('admin.documents.*')" icon="file-text">
-                    <span x-show="!collapsed" x-cloak>Documents</span>
                 </x-sidebar-link>
             </div>
         </div>

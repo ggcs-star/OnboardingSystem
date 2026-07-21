@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProjectDocumentValue;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $client = $request->user()->client;
 
         $projects = $client
-            ? $client->projects()->with(['product.training', 'documentValues', 'client.trainingProgress', 'tickets'])->latest()->get()
+            ? $client->projects()->with(['product.training', 'client.trainingProgress', 'tickets'])->latest()->get()
             : collect();
 
         $docsDone = 0;
@@ -32,10 +32,10 @@ class DashboardController extends Controller
             $trainingTotal += $tTotal;
         }
 
-        $documentStatusCounts = collect(ProjectDocumentValue::STATUSES)->map(
+        $documentStatusCounts = collect(Project::DOCUMENT_STATUSES)->map(
             fn ($status) => [
                 'status' => $status,
-                'count' => $projects->flatMap->documentValues->where('status', $status)->count(),
+                'count' => $projects->flatMap->documentEntries()->where('status', $status)->count(),
             ]
         );
 

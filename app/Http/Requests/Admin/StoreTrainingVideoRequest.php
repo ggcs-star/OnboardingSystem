@@ -14,10 +14,11 @@ class StoreTrainingVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'product_id' => ['required', 'exists:products,id'],
             'title' => ['required', 'string', 'max:255'],
-            'video_url' => ['required', 'url', 'max:255'],
-            'duration' => ['nullable', 'string', 'max:20'],
             'description' => ['nullable', 'string'],
+            'video_url' => ['required', 'string', 'max:500'],
+            'duration' => ['nullable', 'string', 'max:20'],
         ];
     }
 }
