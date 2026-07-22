@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductSubscriptionPlan;
 use App\Models\Project;
+use App\Models\SalesEmployee;
 use App\Services\ProjectService;
 use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
@@ -25,14 +26,14 @@ class OnboardingController extends Controller
     {
         $client = $request->user()->client;
 
-        $onboardedProjects = $client ? $client->projects->keyBy('product_id') : collect();
+        $projectsByProduct = $client ? $client->projects->groupBy('product_id') : collect();
 
         $products = Product::where('active', true)->orderBy('name')->get();
 
         return view('client.onboarding.index', [
             'client' => $client,
             'products' => $products,
-            'onboardedProjects' => $onboardedProjects,
+            'projectsByProduct' => $projectsByProduct,
         ]);
     }
 
@@ -42,16 +43,30 @@ class OnboardingController extends Controller
 
         abort_unless($client, 403);
 
-        $existing = $client->projects()->where('product_id', $product->id)->first();
+        $data = $request->validate([
+            'brand_name' => ['required', 'string', 'max:255'],
+        ]);
 
-        if ($existing) {
-            return redirect()->route('client.onboarding.documents', $existing);
+        $brandName = trim($data['brand_name']);
+        $normalizedBrandName = strtolower(str_replace(' ', '', $brandName));
+
+        $duplicate = $client->projects()
+            ->where('product_id', $product->id)
+            ->whereRaw("LOWER(REPLACE(brand_name, ' ', '')) = ?", [$normalizedBrandName])
+            ->exists();
+
+        if ($duplicate) {
+            return back()
+                ->withErrors(['brand_name' => 'This brand name already exists for this product.'])
+                ->withInput()
+                ->with('duplicate_product_id', $product->id);
         }
 
         $project = $this->projectService->createProject([
             'client_id' => $client->id,
             'product_id' => $product->id,
             'project_name' => $product->name,
+            'brand_name' => $brandName,
         ]);
 
         return redirect()->route('client.onboarding.documents', $project);
@@ -61,7 +76,7 @@ class OnboardingController extends Controller
     {
         abort_unless($project->client->user_id === $request->user()->id, 403);
 
-        $project->load('product');
+        $project->load(['product', 'salesEmployee']);
 
         return view('client.onboarding.documents', [
             'project' => $project,
@@ -69,17 +84,38 @@ class OnboardingController extends Controller
         ]);
     }
 
-    public function subscription(Request $request, Project $project): View
+    public function subscription(Request $request, Project $project): View|RedirectResponse
     {
         abort_unless($project->client->user_id === $request->user()->id, 403);
 
-        $project->load(['product.subscriptionPlans', 'renewal.history']);
+        [$mandatoryDone, $mandatoryTotal] = $project->mandatoryDocumentsProgress();
+
+        if ($mandatoryDone !== $mandatoryTotal) {
+            return redirect()->route('client.onboarding.documents', $project)
+                ->with('error', 'Please submit all mandatory documents before continuing to subscription setup.');
+        }
+
+        $project->load(['product.subscriptionPlans', 'renewal.history', 'salesEmployee']);
 
         return view('client.onboarding.subscription', [
             'project' => $project,
             'plans' => $project->product->subscriptionPlans,
             'renewal' => $project->renewal,
+            'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
         ]);
+    }
+
+    public function selectSalesperson(Request $request, Project $project): RedirectResponse
+    {
+        abort_unless($project->client->user_id === $request->user()->id, 403);
+
+        $data = $request->validate([
+            'sales_employee_id' => ['nullable', 'exists:sales_employees,id'],
+        ]);
+
+        $project->update(['sales_employee_id' => $data['sales_employee_id'] ?? null]);
+
+        return redirect()->route('client.onboarding.subscription', $project);
     }
 
     public function selectPlan(Request $request, Project $project): RedirectResponse

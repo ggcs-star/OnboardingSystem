@@ -27,12 +27,14 @@ class Project extends Model
         'product_id',
         'client_id',
         'project_name',
+        'brand_name',
         'expected_live_date',
         'actual_live_date',
         'status',
         'current_stage',
         'progress',
         'assigned_manager',
+        'sales_employee_id',
         'documents',
     ];
 
@@ -57,6 +59,11 @@ class Project extends Model
         return $this->belongsTo(User::class, 'assigned_manager');
     }
 
+    public function salesEmployee(): BelongsTo
+    {
+        return $this->belongsTo(SalesEmployee::class);
+    }
+
     public function timeline(): HasMany
     {
         return $this->hasMany(ProjectTimeline::class)->orderBy('id');
@@ -75,6 +82,11 @@ class Project extends Model
     public function customizationRequests(): HasMany
     {
         return $this->hasMany(CustomizationRequest::class)->latest();
+    }
+
+    public function policies(): HasMany
+    {
+        return $this->hasMany(ProjectPolicy::class)->latest();
     }
 
     /**

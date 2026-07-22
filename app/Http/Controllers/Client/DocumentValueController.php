@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Client\BulkUpdateDocumentValuesRequest;
 use App\Http\Requests\Client\UpdateOwnDocumentValueRequest;
 use App\Models\Project;
 use App\Services\ProjectDocumentService;
@@ -34,5 +35,33 @@ class DocumentValueController extends Controller
         return redirect()
             ->route('client.projects.show', ['project' => $project, 'tab' => 'documents'])
             ->with('success', 'Document submitted for review.');
+    }
+
+    public function bulkUpdate(BulkUpdateDocumentValuesRequest $request, Project $project): RedirectResponse
+    {
+        abort_unless($project->client->user_id === $request->user()->id, 403);
+
+        foreach ($project->documentEntries() as $entry) {
+            if ($entry->status === 'approved') {
+                continue;
+            }
+
+            $file = $request->file("files.{$entry->group_slug}.{$entry->field_key}");
+            $value = $request->input("fields.{$entry->group_slug}.{$entry->field_key}");
+
+            if (! $file && ! filled($value)) {
+                continue;
+            }
+
+            $this->projectDocumentService->submit($project, $entry->group_slug, $entry->field_key, $value, $file);
+        }
+
+        $this->renewalService->activateIfReady($project);
+
+        if ($request->boolean('onboarding')) {
+            return redirect()->route('client.onboarding.subscription', $project);
+        }
+
+        return back()->with('success', 'Documents submitted for review.');
     }
 }

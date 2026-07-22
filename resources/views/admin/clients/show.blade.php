@@ -61,6 +61,10 @@
                             <p class="mt-1 font-medium text-secondary-dark">{{ $client->user?->email }}</p>
                         </div>
                         <div>
+                            <p class="text-xs uppercase tracking-wide text-secondary">Contact Number</p>
+                            <p class="mt-1 font-medium text-secondary-dark">{{ $client->phone ?: '—' }}</p>
+                        </div>
+                        <div>
                             <p class="text-xs uppercase tracking-wide text-secondary">Location</p>
                             <p class="mt-1 font-medium text-secondary-dark">{{ collect([$client->city, $client->state, $client->country])->filter()->implode(', ') ?: '—' }}</p>
                         </div>
@@ -95,6 +99,30 @@
                                 </div>
                             </div>
                             <x-badge :classes="$stageBadge['classes']" dot>{{ $stageBadge['label'] }}</x-badge>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-1 gap-4 border-t border-app-border pt-5 sm:grid-cols-2">
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-secondary">Client Contact for {{ $project->brand_name ?? $project->project_name }}</p>
+                                <p class="mt-1 text-sm font-medium text-secondary-dark">{{ $client->owner_name ?: $client->company_name }}</p>
+                                <p class="text-sm text-secondary">{{ $client->phone ?: 'No contact number on file' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs uppercase tracking-wide text-secondary">Sold By</p>
+                                <form method="POST" action="{{ route('admin.projects.sales-employee.update', $project) }}" class="mt-1 flex items-center gap-2">
+                                    @csrf
+                                    @method('PATCH')
+                                    <select name="sales_employee_id" onchange="this.form.submit()"
+                                        class="w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                                        <option value="">Not attributed</option>
+                                        @foreach ($salesEmployees as $salesEmployee)
+                                            <option value="{{ $salesEmployee->id }}" @selected($project->sales_employee_id === $salesEmployee->id)>
+                                                {{ $salesEmployee->name }} · {{ $salesEmployee->phone }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </div>
                         </div>
 
                         <div class="mt-5 border-t border-app-border pt-5">

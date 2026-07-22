@@ -126,6 +126,12 @@
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
+                <div>
+                    <x-input-label for="phone" value="Contact Number" class="text-xs uppercase tracking-wide" />
+                    <x-text-input id="phone" name="phone" class="mt-1.5" :value="old('phone')" />
+                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                </div>
+
                 <div class="sm:col-span-2" x-data="{ showPassword: false }">
                     <x-input-label for="password" value="Client Password *" class="text-xs uppercase tracking-wide" />
                     <div class="relative mt-1.5">

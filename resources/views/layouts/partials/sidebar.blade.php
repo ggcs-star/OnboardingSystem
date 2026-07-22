@@ -36,6 +36,9 @@
                 <x-sidebar-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')" icon="box">
                     <span x-show="!collapsed" x-cloak>Products</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
+                    <span x-show="!collapsed" x-cloak>Training</span>
+                </x-sidebar-link>
             </div>
         </div>
 
@@ -45,11 +48,8 @@
                 <x-sidebar-link :href="route('admin.coming-soon', 'Support')" :active="request()->route('label') === 'Support'" icon="life-buoy">
                     <span x-show="!collapsed" x-cloak>Support</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.coming-soon', 'Renewals')" :active="request()->route('label') === 'Renewals'" icon="refresh-cw">
-                    <span x-show="!collapsed" x-cloak>Renewals</span>
-                </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
-                    <span x-show="!collapsed" x-cloak>Training</span>
+                <x-sidebar-link :href="route('admin.sales-employees.index')" :active="request()->routeIs('admin.sales-employees.*')" icon="briefcase">
+                    <span x-show="!collapsed" x-cloak>Sales Team</span>
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.customization-requests.index')" :active="request()->routeIs('admin.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>

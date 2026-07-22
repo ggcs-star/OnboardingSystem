@@ -19,7 +19,7 @@ class ProjectController extends Controller
         $client = $request->user()->client;
 
         $projects = $client
-            ? $client->projects()->with(['product.training', 'client.trainingProgress'])->latest()->get()
+            ? $client->projects()->with('product')->latest()->get()
             : collect();
 
         return view('client.projects.index', ['projects' => $projects]);
@@ -44,10 +44,12 @@ class ProjectController extends Controller
 
         $project->load([
             'product.policies',
+            'policies',
             'product.training',
             'client.trainingProgress',
             'renewal.history',
             'customizationRequests.reviewedBy',
+            'salesEmployee',
         ]);
 
         return view('client.projects.show', [

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreClientRequest;
 use App\Models\Client;
 use App\Models\Project;
+use App\Models\SalesEmployee;
 use App\Services\ClientService;
 use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +49,7 @@ class ClientController extends Controller
 
     public function show(Request $request, Client $client): View
     {
-        $client->load(['user', 'projects.product', 'projects.renewal.history']);
+        $client->load(['user', 'projects.product', 'projects.renewal.history', 'projects.salesEmployee']);
 
         $tabs = ['overview', 'documents'];
         $activeTab = $request->query('tab', 'overview');
@@ -86,6 +87,7 @@ class ClientController extends Controller
             'activeTab' => $activeTab,
             'products' => $products,
             'renewalStatuses' => $renewalStatuses,
+            'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
         ]);
     }
 }

@@ -38,7 +38,7 @@ class ProjectTrainingOverviewController extends Controller
                     'done' => $done,
                     'total' => $total,
                 ];
-            })->values();
+            })->filter(fn ($row) => $row->done > 0)->values();
 
             $product->setRelation('clientRows', $clientRows);
         });

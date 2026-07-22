@@ -13,7 +13,9 @@ use App\Http\Controllers\Admin\ProductRenewalSettingController;
 use App\Http\Controllers\Admin\ProductSubscriptionPlanController;
 use App\Http\Controllers\Admin\ProductTrainingController;
 use App\Http\Controllers\Admin\ProjectDocumentController;
+use App\Http\Controllers\Admin\ProjectSalesAssignmentController;
 use App\Http\Controllers\Admin\ProjectTrainingOverviewController;
+use App\Http\Controllers\Admin\SalesEmployeeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -49,6 +51,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::patch('/projects/{project}/documents/{group}/{field}', [ProjectDocumentController::class, 'update'])->name('projects.documents.update');
     Route::patch('/projects/{project}/customization-requests/{customizationRequest}', [CustomizationRequestController::class, 'update'])->name('projects.customization-requests.update');
+    Route::patch('/projects/{project}/sales-employee', [ProjectSalesAssignmentController::class, 'update'])->name('projects.sales-employee.update');
+
+    Route::get('/sales-employees', [SalesEmployeeController::class, 'index'])->name('sales-employees.index');
+    Route::post('/sales-employees', [SalesEmployeeController::class, 'store'])->name('sales-employees.store');
+    Route::get('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'show'])->name('sales-employees.show');
+    Route::put('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'update'])->name('sales-employees.update');
+    Route::delete('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'destroy'])->name('sales-employees.destroy');
 
     Route::get('/documents', [DocumentReviewController::class, 'index'])->name('documents.index');
 
