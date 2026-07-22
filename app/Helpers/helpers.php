@@ -36,7 +36,7 @@ if (! function_exists('project_stage_badge')) {
     function project_stage_badge(string $stage, string $status = 'active'): array
     {
         if ($status === 'blocked') {
-            return ['classes' => 'bg-danger-light text-danger', 'label' => 'Blocked'];
+            return ['classes' => 'bg-danger-light text-danger', 'label' => 'On Hold'];
         }
 
         return match ($stage) {
@@ -75,6 +75,35 @@ if (! function_exists('document_value_status_badge')) {
             'approved' => ['classes' => 'bg-success-light text-success', 'label' => 'Approved'],
             'rejected' => ['classes' => 'bg-danger-light text-danger', 'label' => 'Rejected'],
             default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Pending'],
+        };
+    }
+}
+
+if (! function_exists('support_ticket_status_badge')) {
+    /**
+     * Tailwind classes + label for a support ticket's status.
+     */
+    function support_ticket_status_badge(string $status): array
+    {
+        return match ($status) {
+            'in_progress' => ['classes' => 'bg-primary-light text-primary', 'label' => 'In Progress'],
+            'resolved' => ['classes' => 'bg-success-light text-success', 'label' => 'Resolved'],
+            'closed' => ['classes' => 'bg-secondary-light text-secondary-dark', 'label' => 'Closed'],
+            default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Open'],
+        };
+    }
+}
+
+if (! function_exists('support_ticket_category_badge')) {
+    /**
+     * Tailwind classes + label for a support ticket's category.
+     */
+    function support_ticket_category_badge(string $category): array
+    {
+        return match ($category) {
+            'training' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Training Related'],
+            'complaint' => ['classes' => 'bg-danger-light text-danger', 'label' => 'Complaint'],
+            default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Need Help'],
         };
     }
 }

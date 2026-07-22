@@ -28,6 +28,8 @@ class Project extends Model
         'client_id',
         'project_name',
         'brand_name',
+        'contact_name',
+        'contact_phone',
         'expected_live_date',
         'actual_live_date',
         'status',
@@ -180,5 +182,23 @@ class Project extends Model
             ->count();
 
         return [$done, $total];
+    }
+
+    /**
+     * Falls back to the client's own name when this brand has no
+     * contact_name of its own set.
+     */
+    public function contactName(): string
+    {
+        return $this->contact_name ?: ($this->client->owner_name ?: $this->client->company_name);
+    }
+
+    /**
+     * Falls back to the client's own phone when this brand has no
+     * contact_phone of its own set.
+     */
+    public function contactPhone(): ?string
+    {
+        return $this->contact_phone ?: $this->client->phone;
     }
 }

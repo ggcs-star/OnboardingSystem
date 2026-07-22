@@ -22,8 +22,6 @@
         :footer="'Your project is currently in ' . $stageBadge['label'] . ' — we\'ll notify you as it moves forward.'"
     />
 
-    <x-sales-contact-card :project="$project" class="mt-6" />
-
     <div class="mt-6 border-b border-app-border">
         <nav class="-mb-px flex gap-6 overflow-x-auto">
             @foreach ($tabs as $key => $tab)

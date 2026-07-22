@@ -115,7 +115,7 @@ class OnboardingController extends Controller
 
         $project->update(['sales_employee_id' => $data['sales_employee_id'] ?? null]);
 
-        return redirect()->route('client.onboarding.subscription', $project);
+        return redirect()->back();
     }
 
     public function selectPlan(Request $request, Project $project): RedirectResponse

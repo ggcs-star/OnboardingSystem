@@ -51,32 +51,66 @@ class ClientController extends Controller
     {
         $client->load(['user', 'projects.product', 'projects.renewal.history', 'projects.salesEmployee']);
 
-        $tabs = ['overview', 'documents'];
+        $tabs = ['overview', 'projects', 'documents'];
         $activeTab = $request->query('tab', 'overview');
         if (! in_array($activeTab, $tabs, true)) {
             $activeTab = 'overview';
         }
 
-        $products = $client->projects->map(function (Project $project) {
-            $groups = $project->documentEntries()
-                ->groupBy('group_slug')
-                ->map(fn ($groupEntries) => (object) [
-                    'label' => $groupEntries->first()->group_label,
-                    'mandatory' => $groupEntries->first()->group_mandatory,
-                    'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
-                        $entry->project = $project;
+        $projectsByProduct = $client->projects
+            ->groupBy('product_id')
+            ->map(function ($productProjects) {
+                $firstProject = $productProjects->first();
+                [$videosDone, $videosTotal] = $firstProject->trainingProgressCount();
 
-                        return $entry;
-                    }),
-                    'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
-                ]);
+                return (object) [
+                    'product' => $firstProject->product,
+                    'videosDone' => $videosDone,
+                    'videosTotal' => $videosTotal,
+                    'projects' => $productProjects->map(function (Project $project) {
+                        [$docsDone, $docsTotal] = $project->documentsProgress();
 
-            return (object) [
-                'project' => $project,
-                'groups' => $groups,
-                'pending' => $groups->sum('pending'),
-            ];
-        });
+                        return (object) [
+                            'project' => $project,
+                            'docsDone' => $docsDone,
+                            'docsTotal' => $docsTotal,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values();
+
+        $products = $client->projects
+            ->groupBy('product_id')
+            ->map(function ($productProjects) {
+                $brands = $productProjects->map(function (Project $project) {
+                    $groups = $project->documentEntries()
+                        ->groupBy('group_slug')
+                        ->map(fn ($groupEntries) => (object) [
+                            'label' => $groupEntries->first()->group_label,
+                            'mandatory' => $groupEntries->first()->group_mandatory,
+                            'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
+                                $entry->project = $project;
+
+                                return $entry;
+                            }),
+                            'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                        ]);
+
+                    return (object) [
+                        'project' => $project,
+                        'groups' => $groups,
+                        'pending' => $groups->sum('pending'),
+                    ];
+                })->values();
+
+                return (object) [
+                    'product' => $productProjects->first()->product,
+                    'brands' => $brands,
+                    'pending' => $brands->sum('pending'),
+                ];
+            })
+            ->values();
 
         $renewalStatuses = $client->projects->mapWithKeys(
             fn (Project $project) => [$project->id => $this->renewalService->statusFor($project->renewal)]
@@ -86,6 +120,7 @@ class ClientController extends Controller
             'client' => $client,
             'activeTab' => $activeTab,
             'products' => $products,
+            'projectsByProduct' => $projectsByProduct,
             'renewalStatuses' => $renewalStatuses,
             'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
         ]);

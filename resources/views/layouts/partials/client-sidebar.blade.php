@@ -44,8 +44,14 @@
                 <x-sidebar-link :href="route('client.training.index')" :active="request()->routeIs('client.training.*')" icon="play-circle">
                     <span x-show="!collapsed" x-cloak>Training</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('client.cheatsheets.index')" :active="request()->routeIs('client.cheatsheets.*')" icon="file-text">
+                    <span x-show="!collapsed" x-cloak>Cheatsheets</span>
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('client.customization-requests.index')" :active="request()->routeIs('client.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>
+                </x-sidebar-link>
+                <x-sidebar-link :href="route('client.support.index')" :active="request()->routeIs('client.support.*')" icon="life-buoy">
+                    <span x-show="!collapsed" x-cloak>Support</span>
                 </x-sidebar-link>
             </div>
         </div>

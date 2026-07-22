@@ -11,8 +11,22 @@ class SupportTicket extends Model
 {
     use HasFactory;
 
+    public const CATEGORIES = [
+        'training' => 'Training Related',
+        'complaint' => 'Complaint',
+        'help' => 'Need Help',
+    ];
+
+    public const STATUSES = [
+        'open' => 'Open',
+        'in_progress' => 'In Progress',
+        'resolved' => 'Resolved',
+        'closed' => 'Closed',
+    ];
+
     protected $fillable = [
         'project_id',
+        'category',
         'ticket_no',
         'subject',
         'priority',

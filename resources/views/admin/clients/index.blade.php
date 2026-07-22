@@ -36,6 +36,7 @@
                     <th class="px-4 py-3">Projects</th>
                     <th class="px-4 py-3">Onboarded</th>
                     <th class="px-4 py-3">Pending Docs</th>
+                    <th class="px-4 py-3 text-right">Projects</th>
                     <th class="px-4 py-3 text-right">Docs</th>
                 </tr>
             </thead>
@@ -76,6 +77,13 @@
                             @endif
                         </td>
                         <td class="px-4 py-3 text-right">
+                            <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'projects']) }}"
+                                class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
+                                title="View projects">
+                                <x-icon name="folder" class="w-4 h-4" />
+                            </a>
+                        </td>
+                        <td class="px-4 py-3 text-right">
                             <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'documents']) }}"
                                 class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
                                 title="View documents">
@@ -85,7 +93,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-secondary">No clients yet.</td>
+                        <td colspan="9" class="px-4 py-8 text-center text-secondary">No clients yet.</td>
                     </tr>
                 @endforelse
             </tbody>
