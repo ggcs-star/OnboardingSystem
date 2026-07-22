@@ -2,14 +2,15 @@
 
 namespace Database\Seeders;
 
-use App\Models\Client;
 use App\Models\Product;
 use App\Models\Project;
-use App\Models\SupportTicket;
+use App\Models\SalesEmployee;
 use App\Models\User;
 use App\Services\ClientService;
 use App\Services\ProjectDocumentService;
 use App\Services\ProjectService;
+use App\Services\RenewalService;
+use App\Services\SupportTicketService;
 use Illuminate\Database\Seeder;
 
 class ProjectSeeder extends Seeder
@@ -19,6 +20,8 @@ class ProjectSeeder extends Seeder
         $clientService = app(ClientService::class);
         $projectService = app(ProjectService::class);
         $projectDocumentService = app(ProjectDocumentService::class);
+        $renewalService = app(RenewalService::class);
+        $supportTicketService = app(SupportTicketService::class);
         $adminId = User::role('admin')->value('id');
 
         $clients = [];
@@ -30,6 +33,8 @@ class ProjectSeeder extends Seeder
             ]);
         }
 
+        $salespeople = SalesEmployee::pluck('id', 'name');
+
         $localPulse = Product::where('name', 'LocalPulse')->firstOrFail();
         $restaurantPos = Product::where('name', 'Restaurant POS')->firstOrFail();
         $schoolErp = Product::where('name', 'School ERP')->firstOrFail();
@@ -38,14 +43,28 @@ class ProjectSeeder extends Seeder
         $rapidRetail = Product::where('name', 'Rapid Retail')->firstOrFail();
 
         $projectsData = [
-            ['name' => 'AajTak City', 'product' => $localPulse, 'client' => $clients['aajtak'], 'stage' => 'live', 'docs' => 'all', 'training' => 'all'],
+            ['name' => 'AajTak City', 'product' => $localPulse, 'client' => $clients['aajtak'], 'stage' => 'live', 'docs' => 'all', 'training' => 'all', 'sales' => 'Joydeep'],
             ['name' => 'Samachar City', 'product' => $localPulse, 'client' => $clients['abc_media'], 'stage' => 'development', 'docs' => 'most', 'training' => 'some'],
             ['name' => 'Saurashtra Bhumi', 'product' => $localPulse, 'client' => $clients['abc_media'], 'stage' => 'documents', 'docs' => 'few', 'training' => 'none'],
             ['name' => 'SSB Travel Updates', 'product' => $localPulse, 'client' => $clients['ssb_travel'], 'stage' => 'live', 'docs' => 'all', 'training' => 'all'],
             ['name' => 'ABC School', 'product' => $schoolErp, 'client' => $clients['abc_school'], 'stage' => 'development', 'docs' => 'most', 'training' => 'few'],
             ['name' => 'XYZ School Portal', 'product' => $schoolErp, 'client' => $clients['xyz_education'], 'stage' => 'documents', 'docs' => 'few', 'training' => 'none'],
-            ['name' => 'Hotel Krishna', 'product' => $restaurantPos, 'client' => $clients['hotel_krishna'], 'stage' => 'development', 'docs' => 'few', 'training' => 'none', 'blocked' => true, 'tickets' => 1],
-            ['name' => 'Raj Restaurant', 'product' => $restaurantPos, 'client' => $clients['raj_restaurant'], 'stage' => 'training', 'docs' => 'most', 'training' => 'some', 'tickets' => 3],
+            [
+                'name' => 'Hotel Krishna', 'product' => $restaurantPos, 'client' => $clients['hotel_krishna'],
+                'stage' => 'development', 'docs' => 'few', 'training' => 'none', 'blocked' => true, 'sales' => 'Priya Solanki',
+                'tickets' => [
+                    ['category' => 'complaint', 'message' => 'The document upload keeps failing for our FSSAI license PDF.', 'reply' => "Thanks for flagging this — we've increased the upload size limit, please try again.", 'status' => 'resolved'],
+                ],
+            ],
+            [
+                'name' => 'Raj Restaurant', 'product' => $restaurantPos, 'client' => $clients['raj_restaurant'],
+                'stage' => 'training', 'docs' => 'most', 'training' => 'some', 'sales' => 'Karan Vora',
+                'tickets' => [
+                    ['category' => 'training', 'message' => 'Where can we watch the billing training video again?', 'reply' => 'You can find it under Training > Billing & Payments — it stays available any time.', 'status' => 'resolved'],
+                    ['category' => 'help', 'message' => 'We need help setting up a second outlet.'],
+                    ['category' => 'complaint', 'message' => 'Our staff account got logged out repeatedly yesterday.'],
+                ],
+            ],
 
             // Additional products/projects from the client's handwritten planning note.
             ['name' => 'Hindtimes', 'product' => $localPulse, 'client' => $clients['hind_times'], ...$this->randomProfile()],
@@ -57,6 +76,32 @@ class ProjectSeeder extends Seeder
             ['name' => 'Bhoodevi', 'product' => $realEstate, 'client' => $clients['bhoodevi'], ...$this->randomProfile()],
             ['name' => 'Mahera Jewels', 'product' => $rapidRetail, 'client' => $clients['mahera_jewels'], ...$this->randomProfile()],
             ['name' => 'Rapid Retails', 'product' => $rapidRetail, 'client' => $clients['rapid_retails'], ...$this->randomProfile()],
+
+            // Second product for the same client (ABC Media) — the fullest
+            // demo scenario: multi-product client, brand-specific contact,
+            // salesperson, partial payment history, a support ticket with an
+            // admin reply, and a customization request.
+            [
+                'name' => 'ABC Retail Hub',
+                'product' => $rapidRetail,
+                'client' => $clients['abc_media'],
+                'stage' => 'live',
+                'docs' => 'all',
+                'training' => 'all',
+                'sales' => 'Joydeep',
+                'contact_name' => 'Rahul Patel (Retail Division)',
+                'contact_phone' => '9998887766',
+                'payment' => 45000,
+                'customization' => [
+                    'title' => 'Add WhatsApp order notifications',
+                    'description' => 'We want customers to get an automatic WhatsApp message when their order is packed.',
+                    'status' => 'approved',
+                    'admin_notes' => "Done — WhatsApp notifications go out automatically once an order is marked 'packed'.",
+                ],
+                'tickets' => [
+                    ['category' => 'training', 'message' => 'Can someone walk us through the inventory reorder alerts again?', 'reply' => "Of course — it's covered in the Inventory Management video, and I've also scheduled a call for Thursday.", 'status' => 'in_progress'],
+                ],
+            ],
         ];
 
         foreach ($projectsData as $data) {
@@ -64,26 +109,55 @@ class ProjectSeeder extends Seeder
                 'product_id' => $data['product']->id,
                 'client_id' => $data['client']->id,
                 'project_name' => $data['name'],
+                'contact_name' => $data['contact_name'] ?? null,
+                'contact_phone' => $data['contact_phone'] ?? null,
+                'sales_employee_id' => isset($data['sales']) ? ($salespeople[$data['sales']] ?? null) : null,
                 'expected_live_date' => now()->addMonths(1),
             ]);
 
             $this->markProgress($projectDocumentService, $adminId, $project, $data['docs'], $data['training']);
 
-            $projectService->advanceStage($project, $data['stage']);
+            $project = $projectService->advanceStage($project, $data['stage']);
 
             if ($data['blocked'] ?? false) {
                 $projectService->toggleBlocked($project);
             }
 
-            for ($i = 0; $i < ($data['tickets'] ?? 0); $i++) {
-                SupportTicket::create([
-                    'project_id' => $project->id,
-                    'ticket_no' => 'TKT-' . $project->id . '-' . ($i + 1),
-                    'subject' => 'Client raised a question during onboarding',
-                    'priority' => 'normal',
-                    'status' => 'open',
+            if (isset($data['payment']) && $project->renewal) {
+                $renewalService->recordPayment(
+                    $project->renewal,
+                    (float) $data['payment'],
+                    now()->subDays(5)->toDateString(),
+                    'Bank Transfer',
+                    'Initial payment'
+                );
+            }
+
+            if (isset($data['customization'])) {
+                $project->customizationRequests()->create([
                     'created_by' => $data['client']->user_id,
+                    'title' => $data['customization']['title'],
+                    'description' => $data['customization']['description'],
+                    'status' => $data['customization']['status'],
+                    'admin_notes' => $data['customization']['admin_notes'] ?? null,
+                    'reviewed_by' => $data['customization']['status'] !== 'pending' ? $adminId : null,
+                    'reviewed_at' => $data['customization']['status'] !== 'pending' ? now() : null,
                 ]);
+            }
+
+            foreach ($data['tickets'] ?? [] as $ticketData) {
+                $ticket = $supportTicketService->createTicket($project, $data['client']->user_id, [
+                    'category' => $ticketData['category'],
+                    'description' => $ticketData['message'],
+                ]);
+
+                if (isset($ticketData['reply']) && $adminId) {
+                    $supportTicketService->addMessage($ticket, $adminId, $ticketData['reply']);
+                }
+
+                if (isset($ticketData['status'])) {
+                    $ticket->update(['status' => $ticketData['status']]);
+                }
             }
         }
     }

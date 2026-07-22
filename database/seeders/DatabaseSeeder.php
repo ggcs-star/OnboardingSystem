@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             ClientUserSeeder::class,
             ProductSeeder::class,
+            SalesEmployeeSeeder::class,
             ProjectSeeder::class,
         ]);
 
