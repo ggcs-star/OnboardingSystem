@@ -10,23 +10,23 @@ use Illuminate\Http\RedirectResponse;
 
 class ProductTrainingController extends Controller
 {
-    public function store(StoreTrainingVideoRequest $request, Product $product): RedirectResponse
+    public function store(StoreTrainingVideoRequest $request): RedirectResponse
     {
-        $product->training()->create($request->validated());
+        $product = Product::findOrFail($request->validated('product_id'));
+
+        $product->training()->create($request->safe()->except('product_id'));
 
         return redirect()
-            ->route('admin.products.show', ['product' => $product, 'tab' => 'training-videos'])
+            ->route('admin.training.index')
             ->with('success', 'Training video added.');
     }
 
-    public function destroy(Product $product, ProductTraining $training): RedirectResponse
+    public function destroy(ProductTraining $training): RedirectResponse
     {
-        abort_unless($training->product_id === $product->id, 404);
-
         $training->delete();
 
         return redirect()
-            ->route('admin.products.show', ['product' => $product, 'tab' => 'training-videos'])
+            ->route('admin.training.index')
             ->with('success', 'Training video removed.');
     }
 }

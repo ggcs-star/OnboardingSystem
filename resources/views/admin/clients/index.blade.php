@@ -29,38 +29,34 @@
         <table class="min-w-full divide-y divide-app-border text-sm">
             <thead>
                 <tr class="text-left text-xs font-semibold uppercase tracking-wide text-secondary">
-                    <th class="px-4 py-3">Company</th>
-                    <th class="px-4 py-3">Owner</th>
+                    <th class="px-4 py-3">Client Name</th>
+                    <th class="px-4 py-3">Email</th>
                     <th class="px-4 py-3">Location</th>
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3">Projects</th>
                     <th class="px-4 py-3">Onboarded</th>
                     <th class="px-4 py-3">Pending Docs</th>
-                    <th class="px-4 py-3">Tickets</th>
-                    <th class="px-4 py-3">Last Login</th>
+                    <th class="px-4 py-3 text-right">Projects</th>
+                    <th class="px-4 py-3 text-right">Docs</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-app-border">
                 @forelse ($clients as $client)
                     @php
                         $activeProjects = $client->projects->where('status', 'active')->count();
-                        $pendingDocs = $client->projects->flatMap->documentValues->where('status', '!=', 'approved')->count();
-                        $openTickets = $client->projects->flatMap->tickets->where('status', 'open')->count();
+                        $pendingDocs = $client->projects->flatMap->documentEntries()->where('status', '!=', 'approved')->count();
                     @endphp
                     <tr>
                         <td class="px-4 py-3">
-                            <div class="flex items-center gap-3">
+                            <a href="{{ route('admin.clients.show', $client) }}" class="flex items-center gap-3 hover:text-primary">
                                 <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-semibold text-primary">
                                     {{ Str::substr($client->company_name, 0, 1) }}
                                 </span>
-                                <a href="{{ route('admin.projects.index', ['client' => $client->id]) }}" class="font-medium text-secondary-dark hover:text-primary">
-                                    {{ $client->company_name }}
-                                </a>
-                            </div>
+                                <span class="font-medium text-secondary-dark">{{ $client->company_name }}</span>
+                            </a>
                         </td>
                         <td class="px-4 py-3 text-secondary">
-                            <div>{{ $client->owner_name }}</div>
-                            <div class="text-xs text-secondary/70">{{ $client->user?->email }}</div>
+                            {{ $client->user?->email }}
                         </td>
                         <td class="px-4 py-3 text-secondary">
                             {{ collect([$client->city, $client->state])->filter()->implode(', ') ?: '—' }}
@@ -80,10 +76,20 @@
                                 <span class="text-success">All done</span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-secondary">
-                            {{ $openTickets ?: '—' }}
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'projects']) }}"
+                                class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
+                                title="View projects">
+                                <x-icon name="folder" class="w-4 h-4" />
+                            </a>
                         </td>
-                        <td class="px-4 py-3 text-secondary">—</td>
+                        <td class="px-4 py-3 text-right">
+                            <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'documents']) }}"
+                                class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
+                                title="View documents">
+                                <x-icon name="file-text" class="w-4 h-4" />
+                            </a>
+                        </td>
                     </tr>
                 @empty
                     <tr>
@@ -111,26 +117,38 @@
 
             <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                    <x-input-label for="company_name" value="Company Name *" class="text-xs uppercase tracking-wide" />
+                    <x-input-label for="company_name" value="Client Name *" class="text-xs uppercase tracking-wide" />
                     <x-text-input id="company_name" name="company_name" class="mt-1.5" :value="old('company_name')" required />
                     <x-input-error :messages="$errors->get('company_name')" class="mt-2" />
                 </div>
 
                 <div>
-                    <x-input-label for="owner_name" value="Owner Name" class="text-xs uppercase tracking-wide" />
+                    <x-input-label for="owner_name" value="Company Name" class="text-xs uppercase tracking-wide" />
                     <x-text-input id="owner_name" name="owner_name" class="mt-1.5" :value="old('owner_name')" />
                     <x-input-error :messages="$errors->get('owner_name')" class="mt-2" />
                 </div>
 
                 <div>
-                    <x-input-label for="email" value="Login Email *" class="text-xs uppercase tracking-wide" />
+                    <x-input-label for="email" value="Client Email *" class="text-xs uppercase tracking-wide" />
                     <x-text-input id="email" name="email" type="email" class="mt-1.5" :value="old('email')" required />
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
-                <div class="sm:col-span-2">
-                    <x-input-label for="password" value="Login Password *" class="text-xs uppercase tracking-wide" />
-                    <x-text-input id="password" name="password" type="text" class="mt-1.5" placeholder="Shared with the client to log in" required />
+                <div>
+                    <x-input-label for="phone" value="Contact Number" class="text-xs uppercase tracking-wide" />
+                    <x-text-input id="phone" name="phone" class="mt-1.5" :value="old('phone')" />
+                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                </div>
+
+                <div class="sm:col-span-2" x-data="{ showPassword: false }">
+                    <x-input-label for="password" value="Client Password *" class="text-xs uppercase tracking-wide" />
+                    <div class="relative mt-1.5">
+                        <x-text-input id="password" name="password" :type="'password'" x-bind:type="showPassword ? 'text' : 'password'" class="pr-10" placeholder="Shared with the client to log in" required />
+                        <button type="button" x-on:click="showPassword = !showPassword" class="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-secondary hover:text-secondary-dark">
+                            <x-icon x-show="!showPassword" name="eye" class="!w-4 !h-4" />
+                            <x-icon x-show="showPassword" name="eye-off" class="!w-4 !h-4" x-cloak />
+                        </button>
+                    </div>
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 

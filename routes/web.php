@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 
@@ -19,6 +19,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
 
         if ($user->hasRole('client')) {
+            if (! $user->client || $user->client->projects()->doesntExist()) {
+                return redirect()->route('client.onboarding.index');
+            }
+
             return redirect()->route('client.dashboard');
         }
 

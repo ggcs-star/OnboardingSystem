@@ -49,7 +49,6 @@
     <div class="mt-6 rounded-xl border border-app-border bg-white">
         <div class="flex items-center justify-between p-6 pb-0">
             <p class="text-sm font-semibold text-secondary-dark">Recent Projects</p>
-            <a href="{{ route('admin.projects.index') }}" class="text-xs font-medium text-primary hover:underline">View all</a>
         </div>
 
         <div class="mt-4 overflow-x-auto">
@@ -72,10 +71,8 @@
                             [$trainingDone, $trainingTotal] = $project->trainingProgressCount();
                         @endphp
                         <tr>
-                            <td class="px-6 py-3">
-                                <a href="{{ route('admin.projects.show', $project) }}" class="font-medium text-secondary-dark hover:text-primary">
-                                    {{ $project->project_name }}
-                                </a>
+                            <td class="px-6 py-3 font-medium text-secondary-dark">
+                                {{ $project->project_name }}
                             </td>
                             <td class="px-6 py-3 text-secondary">{{ $project->product->name }}</td>
                             <td class="px-6 py-3 text-secondary">{{ $project->client->company_name }}</td>
@@ -127,9 +124,6 @@
             </a>
             <a href="{{ route('admin.clients.index') }}" class="flex items-center gap-2 rounded-lg border border-app-border px-3 py-2.5 text-sm font-medium text-secondary-dark hover:bg-surface-alt">
                 <x-icon name="users" class="w-4 h-4 text-primary" /> Clients
-            </a>
-            <a href="{{ route('admin.projects.index') }}" class="flex items-center gap-2 rounded-lg border border-app-border px-3 py-2.5 text-sm font-medium text-secondary-dark hover:bg-surface-alt">
-                <x-icon name="folder" class="w-4 h-4 text-primary" /> Projects
             </a>
             <a href="{{ route('admin.documents.index') }}" class="flex items-center gap-2 rounded-lg border border-app-border px-3 py-2.5 text-sm font-medium text-secondary-dark hover:bg-surface-alt">
                 <x-icon name="file-text" class="w-4 h-4 text-primary" /> Documents

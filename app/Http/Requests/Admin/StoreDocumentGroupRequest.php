@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProjectRequest extends FormRequest
+class StoreDocumentGroupRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,9 +14,8 @@ class UpdateProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_name' => ['required', 'string', 'max:255'],
-            'expected_live_date' => ['nullable', 'date'],
-            'actual_live_date' => ['nullable', 'date'],
+            'name' => ['required', 'string', 'max:255'],
+            'is_mandatory' => ['nullable', 'boolean'],
         ];
     }
 }

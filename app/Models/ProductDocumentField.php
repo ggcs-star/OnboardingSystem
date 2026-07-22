@@ -13,7 +13,7 @@ class ProductDocumentField extends Model
 
     protected $fillable = [
         'product_id',
-        'section',
+        'product_document_group_id',
         'label',
         'field_key',
         'field_type',
@@ -31,5 +31,10 @@ class ProductDocumentField extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(ProductDocumentGroup::class, 'product_document_group_id');
     }
 }

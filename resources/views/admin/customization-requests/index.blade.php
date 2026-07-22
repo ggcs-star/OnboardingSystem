@@ -24,9 +24,7 @@
                         <div class="p-5">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
-                                    <a href="{{ route('admin.projects.show', ['project' => $row->project, 'tab' => 'customization']) }}" class="font-medium text-secondary-dark hover:text-primary">
-                                        {{ $row->request->title }}
-                                    </a>
+                                    <p class="font-medium text-secondary-dark">{{ $row->request->title }}</p>
                                     <p class="text-xs text-secondary">{{ $row->client->company_name }} · {{ $row->project->project_name }}</p>
                                     <p class="mt-2 text-sm text-secondary">{{ $row->request->description }}</p>
                                     <p class="mt-2 text-xs text-secondary/70">

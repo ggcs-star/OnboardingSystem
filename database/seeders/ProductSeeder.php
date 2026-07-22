@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Product;
 use App\Models\ProductPolicy;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ProductSeeder extends Seeder
 {
@@ -19,16 +20,23 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($localPulse);
+        $this->seedSubscriptionPlan($localPulse);
 
-        $localPulse->documentFields()->createMany([
-            ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG, min 200x200px)', 'required' => true],
-            ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
-            ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. samacharcity.in', 'required' => true],
-            ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
-            ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
-            ['label' => 'Google Map API Key', 'field_key' => 'google_map_api_key', 'field_type' => 'key', 'placeholder' => 'AIza...', 'required' => false],
-            ['label' => 'Razorpay Key', 'field_key' => 'razorpay_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
-        ]);
+        $this->seedDocumentGroups($localPulse,
+            general: [
+                ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG, min 200x200px)', 'required' => true],
+                ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. samacharcity.in', 'required' => true],
+            ],
+            billing: [
+                ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
+                ['label' => 'Razorpay Key', 'field_key' => 'razorpay_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
+            ],
+            development: [
+                ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
+                ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
+                ['label' => 'Google Map API Key', 'field_key' => 'google_map_api_key', 'field_type' => 'key', 'placeholder' => 'AIza...', 'required' => false],
+            ],
+        );
 
         $localPulse->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the admin dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '8:24'],
@@ -45,6 +53,11 @@ class ProductSeeder extends Seeder
             ['question' => 'What is the Google Map API key used for?', 'answer' => 'The Google Map API key is used to display location-based news on the map view of your portal. It is optional but recommended for a better user experience.'],
         ]);
 
+        $this->seedCheatsheets($localPulse, [
+            ['title' => 'LocalPulse Quick Start Guide', 'description' => 'Everything you need to publish your first news article.'],
+            ['title' => 'Reporter Onboarding Checklist', 'description' => 'A step-by-step checklist for bringing a new reporter on board.'],
+        ]);
+
         $restaurantPos = Product::create([
             'name' => 'Restaurant POS',
             'tagline' => 'Complete Point of Sale for Restaurants',
@@ -54,14 +67,21 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($restaurantPos);
+        $this->seedSubscriptionPlan($restaurantPos);
 
-        $restaurantPos->documentFields()->createMany([
-            ['label' => 'Restaurant Logo', 'field_key' => 'restaurant_logo', 'field_type' => 'image', 'placeholder' => 'Upload restaurant logo (PNG/JPG)', 'required' => true],
-            ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
-            ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
-            ['label' => 'Menu PDF', 'field_key' => 'menu_pdf', 'field_type' => 'pdf', 'placeholder' => 'Upload current menu as PDF', 'required' => false],
-            ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => true],
-        ]);
+        $this->seedDocumentGroups($restaurantPos,
+            general: [
+                ['label' => 'Restaurant Logo', 'field_key' => 'restaurant_logo', 'field_type' => 'image', 'placeholder' => 'Upload restaurant logo (PNG/JPG)', 'required' => true],
+                ['label' => 'Menu PDF', 'field_key' => 'menu_pdf', 'field_type' => 'pdf', 'placeholder' => 'Upload current menu as PDF', 'required' => false],
+            ],
+            billing: [
+                ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
+                ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
+            ],
+            development: [
+                ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => true],
+            ],
+        );
 
         $restaurantPos->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the admin dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '7:10'],
@@ -86,17 +106,24 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($schoolErp);
+        $this->seedSubscriptionPlan($schoolErp);
 
-        $schoolErp->documentFields()->createMany([
-            ['label' => 'School Logo', 'field_key' => 'school_logo', 'field_type' => 'image', 'placeholder' => 'Upload school logo (PNG/JPG)', 'required' => true],
-            ['label' => 'School Registration Number', 'field_key' => 'school_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. SCH/2020/00123', 'required' => true],
-            ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. myschool.edu.in', 'required' => true],
-            ['label' => 'Affiliation Certificate', 'field_key' => 'affiliation_certificate', 'field_type' => 'pdf', 'placeholder' => 'Upload board affiliation certificate', 'required' => true],
-            ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
-            ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
-            ['label' => 'SMS Gateway Key', 'field_key' => 'sms_gateway_key', 'field_type' => 'key', 'placeholder' => 'API key for SMS notifications', 'required' => false],
-            ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => true],
-        ]);
+        $this->seedDocumentGroups($schoolErp,
+            general: [
+                ['label' => 'School Logo', 'field_key' => 'school_logo', 'field_type' => 'image', 'placeholder' => 'Upload school logo (PNG/JPG)', 'required' => true],
+                ['label' => 'Domain Name', 'field_key' => 'domain_name', 'field_type' => 'text', 'placeholder' => 'e.g. myschool.edu.in', 'required' => true],
+            ],
+            billing: [
+                ['label' => 'School Registration Number', 'field_key' => 'school_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. SCH/2020/00123', 'required' => true],
+                ['label' => 'Affiliation Certificate', 'field_key' => 'affiliation_certificate', 'field_type' => 'pdf', 'placeholder' => 'Upload board affiliation certificate', 'required' => true],
+            ],
+            development: [
+                ['label' => 'Hosting Credentials', 'field_key' => 'hosting_credentials', 'field_type' => 'key', 'placeholder' => 'cPanel username and password', 'required' => true],
+                ['label' => 'SMTP Configuration', 'field_key' => 'smtp_configuration', 'field_type' => 'key', 'placeholder' => 'Host, port, username, password', 'required' => true],
+                ['label' => 'SMS Gateway Key', 'field_key' => 'sms_gateway_key', 'field_type' => 'key', 'placeholder' => 'API key for SMS notifications', 'required' => false],
+                ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => true],
+            ],
+        );
 
         $schoolErp->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the admin dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '7:45'],
@@ -123,14 +150,21 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($restaurantRevenue);
+        $this->seedSubscriptionPlan($restaurantRevenue);
 
-        $restaurantRevenue->documentFields()->createMany([
-            ['label' => 'Brand Logo', 'field_key' => 'brand_logo', 'field_type' => 'image', 'placeholder' => 'Upload brand logo (PNG/JPG)', 'required' => true],
-            ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
-            ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
-            ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => true],
-            ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
-        ]);
+        $this->seedDocumentGroups($restaurantRevenue,
+            general: [
+                ['label' => 'Brand Logo', 'field_key' => 'brand_logo', 'field_type' => 'image', 'placeholder' => 'Upload brand logo (PNG/JPG)', 'required' => true],
+            ],
+            billing: [
+                ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
+                ['label' => 'FSSAI License Number', 'field_key' => 'fssai_license_number', 'field_type' => 'text', 'placeholder' => 'e.g. 12345678901234', 'required' => true],
+                ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => true],
+            ],
+            development: [
+                ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
+            ],
+        );
 
         $restaurantRevenue->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the revenue dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '7:30'],
@@ -153,14 +187,21 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($realEstate);
+        $this->seedSubscriptionPlan($realEstate);
 
-        $realEstate->documentFields()->createMany([
-            ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG)', 'required' => true],
-            ['label' => 'RERA Registration Number', 'field_key' => 'rera_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. PR/GJ/RAJKOT/1234/2026', 'required' => true],
-            ['label' => 'Company PAN', 'field_key' => 'company_pan', 'field_type' => 'text', 'placeholder' => 'e.g. ABCDE1234F', 'required' => true],
-            ['label' => 'Office Address Proof', 'field_key' => 'office_address_proof', 'field_type' => 'pdf', 'placeholder' => 'Upload office address proof', 'required' => true],
-            ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => false],
-        ]);
+        $this->seedDocumentGroups($realEstate,
+            general: [
+                ['label' => 'Company Logo', 'field_key' => 'company_logo', 'field_type' => 'image', 'placeholder' => 'Upload company logo (PNG/JPG)', 'required' => true],
+            ],
+            billing: [
+                ['label' => 'RERA Registration Number', 'field_key' => 'rera_registration_number', 'field_type' => 'text', 'placeholder' => 'e.g. PR/GJ/RAJKOT/1234/2026', 'required' => true],
+                ['label' => 'Company PAN', 'field_key' => 'company_pan', 'field_type' => 'text', 'placeholder' => 'e.g. ABCDE1234F', 'required' => true],
+            ],
+            development: [
+                ['label' => 'Office Address Proof', 'field_key' => 'office_address_proof', 'field_type' => 'pdf', 'placeholder' => 'Upload office address proof', 'required' => true],
+                ['label' => 'Bank Account Details', 'field_key' => 'bank_account_details', 'field_type' => 'key', 'placeholder' => 'Account number, IFSC, bank name', 'required' => false],
+            ],
+        );
 
         $realEstate->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '7:00'],
@@ -183,14 +224,21 @@ class ProductSeeder extends Seeder
         ]);
 
         $this->seedDefaultPolicies($rapidRetail);
+        $this->seedSubscriptionPlan($rapidRetail);
 
-        $rapidRetail->documentFields()->createMany([
-            ['label' => 'Store Logo', 'field_key' => 'store_logo', 'field_type' => 'image', 'placeholder' => 'Upload store logo (PNG/JPG)', 'required' => true],
-            ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
-            ['label' => 'Trade License', 'field_key' => 'trade_license', 'field_type' => 'pdf', 'placeholder' => 'Upload trade license', 'required' => true],
-            ['label' => 'POS Terminal Key', 'field_key' => 'pos_terminal_key', 'field_type' => 'key', 'placeholder' => 'Terminal ID and activation key', 'required' => true],
-            ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
-        ]);
+        $this->seedDocumentGroups($rapidRetail,
+            general: [
+                ['label' => 'Store Logo', 'field_key' => 'store_logo', 'field_type' => 'image', 'placeholder' => 'Upload store logo (PNG/JPG)', 'required' => true],
+            ],
+            billing: [
+                ['label' => 'GST Number', 'field_key' => 'gst_number', 'field_type' => 'text', 'placeholder' => 'e.g. 24ABCDE1234F1Z5', 'required' => true],
+                ['label' => 'Trade License', 'field_key' => 'trade_license', 'field_type' => 'pdf', 'placeholder' => 'Upload trade license', 'required' => true],
+            ],
+            development: [
+                ['label' => 'POS Terminal Key', 'field_key' => 'pos_terminal_key', 'field_type' => 'key', 'placeholder' => 'Terminal ID and activation key', 'required' => true],
+                ['label' => 'Payment Gateway Key', 'field_key' => 'payment_gateway_key', 'field_type' => 'key', 'placeholder' => 'rzp_live_...', 'required' => false],
+            ],
+        );
 
         $rapidRetail->training()->createMany([
             ['title' => 'Getting Started — Login & Dashboard', 'description' => 'Learn how to login and navigate the dashboard.', 'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'duration' => '6:50'],
@@ -204,9 +252,74 @@ class ProductSeeder extends Seeder
             ['question' => 'What happens when stock runs low?', 'answer' => 'Rapid Retail sends a reorder alert once stock for an item falls below the threshold you set for it.'],
         ]);
 
+        $this->seedCheatsheets($rapidRetail, [
+            ['title' => 'Rapid Retail Setup Checklist', 'description' => 'Everything a new store needs before going live.'],
+        ]);
+
         // Clients & Projects are seeded separately in ProjectSeeder, using
         // ClientService/ProjectService so they get real logins, document
         // templates, training progress, timelines and renewals.
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $general
+     * @param array<int, array<string, mixed>> $billing
+     * @param array<int, array<string, mixed>> $development
+     */
+    private function seedDocumentGroups(Product $product, array $general, array $billing, array $development): void
+    {
+        $groups = [
+            'General' => ['slug' => 'general', 'mandatory' => true, 'fields' => $general],
+            'Billing' => ['slug' => 'billing', 'mandatory' => true, 'fields' => $billing],
+            'Development' => ['slug' => 'development', 'mandatory' => false, 'fields' => $development],
+        ];
+
+        foreach ($groups as $name => $group) {
+            $record = $product->documentGroups()->create([
+                'name' => $name,
+                'slug' => $group['slug'],
+                'is_mandatory' => $group['mandatory'],
+            ]);
+
+            $product->documentFields()->createMany(array_map(
+                fn (array $field) => [...$field, 'product_document_group_id' => $record->id],
+                $group['fields']
+            ));
+        }
+    }
+
+    private function seedSubscriptionPlan(Product $product): void
+    {
+        $product->subscriptionPlans()->create([
+            'name' => 'Yearly',
+            'duration_months' => 12,
+            'amount' => 90000,
+        ]);
+    }
+
+    /**
+     * Writes a placeholder text file per cheatsheet so the view/download
+     * links work out of the box in a demo — swap these for real PDFs/docs
+     * whenever you have them.
+     *
+     * @param array<int, array{title: string, description: string}> $sheets
+     */
+    private function seedCheatsheets(Product $product, array $sheets): void
+    {
+        foreach ($sheets as $sheet) {
+            $path = 'cheatsheets/' . str()->slug($sheet['title']) . '.txt';
+
+            Storage::disk('public')->put(
+                $path,
+                "{$sheet['title']}\n\n{$sheet['description']}\n\nThis is a placeholder demo document for {$product->name}. Replace it with the real PDF/Word file from the admin Cheatsheets screen."
+            );
+
+            $product->cheatsheets()->create([
+                'title' => $sheet['title'],
+                'description' => $sheet['description'],
+                'file' => $path,
+            ]);
+        }
     }
 
     private function seedDefaultPolicies(Product $product): void

@@ -44,7 +44,6 @@ class ProductController extends Controller
         $tabs = [
             'product-details',
             'document-fields',
-            'training-videos',
             'policies',
             'faqs',
             'renewal-settings',
@@ -56,7 +55,7 @@ class ProductController extends Controller
         }
 
         $product->loadCount('training', 'faqs', 'documentFields');
-        $product->load(['documentFields', 'training', 'faqs', 'policies', 'renewalSetting']);
+        $product->load(['documentGroups', 'faqs', 'policies', 'renewalSetting', 'subscriptionPlans']);
 
         return view('admin.products.show', [
             'product' => $product,

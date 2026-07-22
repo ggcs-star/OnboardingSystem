@@ -24,6 +24,7 @@ class ClientService
                 'user_id' => $user->id,
                 'company_name' => $data['company_name'],
                 'owner_name' => $data['owner_name'] ?? null,
+                'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
                 'city' => $data['city'] ?? null,
                 'state' => $data['state'] ?? null,

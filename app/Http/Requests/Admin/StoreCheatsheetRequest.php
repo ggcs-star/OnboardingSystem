@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProjectRequest extends FormRequest
+class StoreCheatsheetRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,9 +15,9 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'product_id' => ['required', 'exists:products,id'],
-            'client_id' => ['required', 'exists:clients,id'],
-            'project_name' => ['required', 'string', 'max:255'],
-            'expected_live_date' => ['nullable', 'date'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'file' => ['required', 'file', 'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx', 'max:20480'],
         ];
     }
 }

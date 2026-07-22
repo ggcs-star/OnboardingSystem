@@ -1,7 +1,7 @@
-<x-admin-layout title="Documents">
+<x-admin-layout title="Client Documents">
     <div>
-        <h1 class="text-2xl font-semibold text-secondary-dark">Documents</h1>
-        <p class="mt-1 text-sm text-secondary">Review and approve client document submissions across all projects</p>
+        <h1 class="text-2xl font-semibold text-secondary-dark">Client Documents</h1>
+        <p class="mt-1 text-sm text-secondary">Review and approve client document submissions, grouped by client, product and document group</p>
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -33,140 +33,41 @@
         <button type="submit" class="hidden"></button>
     </form>
 
-    <div class="mt-6 overflow-x-auto rounded-xl border border-app-border bg-white">
-        <table class="min-w-full divide-y divide-app-border text-sm">
-            <thead>
-                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-secondary">
-                    <th class="px-4 py-3">Project / Client</th>
-                    <th class="px-4 py-3">Product</th>
-                    <th class="px-4 py-3">Field</th>
-                    <th class="px-4 py-3">Submitted Value</th>
-                    <th class="px-4 py-3">Submitted</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-app-border">
-                @forelse ($values as $value)
-                    @php
-                        $badge = document_value_status_badge($value->status);
-                        $typeBadge = document_field_type_badge($value->documentField->field_type);
-                    @endphp
-                    <tr>
-                        <td class="px-4 py-3">
-                            <a href="{{ route('admin.projects.show', ['project' => $value->project, 'tab' => 'documents']) }}" class="font-medium text-secondary-dark hover:text-primary">
-                                {{ $value->project->project_name }}
-                            </a>
-                            <div class="text-xs text-secondary">{{ $value->project->client->company_name }}</div>
-                        </td>
-                        <td class="px-4 py-3">
-                            <x-badge classes="bg-surface-alt text-secondary">{{ $value->project->product->name }}</x-badge>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-2 font-medium text-secondary-dark">
-                                <x-icon :name="$value->documentField->field_type === 'image' ? 'file-text' : 'file-text'" class="w-4 h-4 text-secondary/60" />
-                                {{ $value->documentField->label }}
-                                @if ($value->documentField->required)
-                                    <span class="text-danger">*</span>
-                                @endif
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-secondary">
-                            @if ($value->file)
-                                <a href="{{ asset('storage/' . $value->file) }}" target="_blank" class="text-primary hover:underline">View file</a>
-                            @elseif ($value->value)
-                                {{ Str::limit($value->value, 30) }}
-                            @else
-                                <span class="text-secondary/60">—</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-secondary">{{ $value->updated_at->format('d-M-Y') }}</td>
-                        <td class="px-4 py-3">
-                            <x-badge :classes="$badge['classes']">{{ $badge['label'] }}</x-badge>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            @if (in_array($value->status, ['submitted', 'rejected'], true))
-                                <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'review-{{ $value->id }}')"
-                                    class="inline-flex items-center gap-1.5 rounded-lg border border-app-border px-3 py-1.5 text-xs font-medium text-secondary-dark hover:bg-surface-alt">
-                                    <x-icon name="eye" class="w-3.5 h-3.5" />
-                                    Review
-                                </button>
+    <div class="mt-6 space-y-3">
+        @forelse ($clients as $clientRow)
+            <div class="rounded-xl border border-app-border bg-white" x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }">
+                <button type="button" x-on:click="open = !open" class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-semibold text-primary">
+                            {{ Str::substr($clientRow->client->company_name, 0, 1) }}
+                        </span>
+                        <div>
+                            <p class="font-medium text-secondary-dark">{{ $clientRow->client->company_name }}</p>
+                            <p class="text-xs text-secondary">{{ $clientRow->products->count() }} product{{ $clientRow->products->count() === 1 ? '' : 's' }} onboarded</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        @if ($clientRow->pending > 0)
+                            <x-badge classes="bg-warning-light text-warning">{{ $clientRow->pending }} pending</x-badge>
+                        @else
+                            <x-badge classes="bg-success-light text-success">All clear</x-badge>
+                        @endif
+                        <x-icon name="chevron-down" class="w-4 h-4 shrink-0 text-secondary transition-transform" x-bind:class="open && 'rotate-180'" />
+                    </div>
+                </button>
 
-                                <x-modal :name="'review-' . $value->id" focusable>
-                                    <div class="p-6">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <h2 class="text-lg font-semibold text-secondary-dark">Review Submission</h2>
-                                                <p class="text-xs text-secondary">{{ $value->project->project_name }} · {{ $value->project->client->company_name }}</p>
-                                            </div>
-                                            <button type="button" x-on:click="$dispatch('close')" class="text-secondary hover:text-secondary-dark">
-                                                <x-icon name="x" class="w-5 h-5" />
-                                            </button>
-                                        </div>
-
-                                        <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <p class="text-xs uppercase tracking-wide text-secondary">Field</p>
-                                                <p class="mt-1 font-medium text-secondary-dark">{{ $value->documentField->label }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs uppercase tracking-wide text-secondary">Type</p>
-                                                <p class="mt-1 font-medium text-secondary-dark">{{ $typeBadge['label'] }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs uppercase tracking-wide text-secondary">Product</p>
-                                                <p class="mt-1 font-medium text-secondary-dark">{{ $value->project->product->name }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs uppercase tracking-wide text-secondary">Submitted On</p>
-                                                <p class="mt-1 font-medium text-secondary-dark">{{ $value->updated_at->format('d-M-Y') }}</p>
-                                            </div>
-                                        </div>
-
-                                        <form method="POST" action="{{ route('admin.projects.document-values.update', ['project' => $value->project, 'documentValue' => $value]) }}" class="mt-5">
-                                            @csrf
-                                            @method('PATCH')
-
-                                            <x-input-label value="Submitted Value" class="text-xs uppercase tracking-wide" />
-                                            <div class="mt-1.5 rounded-lg border border-app-border bg-surface-alt px-3 py-2 text-sm text-secondary-dark">
-                                                @if ($value->file)
-                                                    <a href="{{ asset('storage/' . $value->file) }}" target="_blank" class="text-primary hover:underline">View uploaded file</a>
-                                                @else
-                                                    {{ $value->value ?: '—' }}
-                                                @endif
-                                            </div>
-
-                                            <div class="mt-6 flex justify-between">
-                                                <x-secondary-button type="button" x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                                <div class="flex gap-3">
-                                                    <button type="submit" name="status" value="rejected" class="inline-flex items-center gap-2 rounded-lg bg-danger-light px-4 py-2.5 text-sm font-medium text-danger hover:opacity-80">
-                                                        <x-icon name="x" class="w-4 h-4" />
-                                                        Reject
-                                                    </button>
-                                                    <button type="submit" name="status" value="approved" class="inline-flex items-center gap-2 rounded-lg bg-success px-4 py-2.5 text-sm font-medium text-white hover:opacity-90">
-                                                        <x-icon name="check" class="w-4 h-4" />
-                                                        Approve
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </x-modal>
-                            @else
-                                <span class="text-xs text-secondary/60">—</span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-secondary">No document submissions yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                <div x-show="open" x-cloak class="space-y-3 border-t border-app-border p-4">
+                    @include('admin.documents.partials.product-groups', ['products' => $clientRow->products])
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-dashed border-app-border bg-white p-10 text-center text-sm text-secondary">
+                No document submissions yet.
+            </div>
+        @endforelse
     </div>
 
     <div class="mt-4">
-        {{ $values->links() }}
+        {{ $clients->links() }}
     </div>
 </x-admin-layout>

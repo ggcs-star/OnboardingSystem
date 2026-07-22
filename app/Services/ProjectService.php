@@ -10,8 +10,10 @@ use Illuminate\Support\Carbon;
 
 class ProjectService
 {
-    public function __construct(private RenewalService $renewalService)
-    {
+    public function __construct(
+        private RenewalService $renewalService,
+        private ProjectDocumentService $projectDocumentService,
+    ) {
     }
 
     public function createProject(array $data): Project
@@ -25,12 +27,7 @@ class ProjectService
 
         $project->load('product.documentFields', 'product.training', 'client');
 
-        foreach ($project->product->documentFields as $field) {
-            $project->documentValues()->create([
-                'document_field_id' => $field->id,
-                'status' => 'pending',
-            ]);
-        }
+        $this->projectDocumentService->initialize($project);
 
         foreach ($project->product->training as $video) {
             $project->client->trainingProgress()->firstOrCreate([
@@ -89,13 +86,13 @@ class ProjectService
 
     public function getDashboardStats(): array
     {
-        $projects = Project::with('documentValues')->get();
+        $projects = Project::all();
 
         return [
             'active_projects' => $projects->where('status', 'active')->count(),
             'total_projects' => $projects->count(),
             'documents_pending' => $projects->filter(function (Project $project) {
-                return $project->documentValues->contains(fn ($value) => $value->status !== 'approved');
+                return $project->documentEntries()->contains(fn ($entry) => $entry->status !== 'approved');
             })->count(),
             'open_support_tickets' => SupportTicket::where('status', 'open')->count(),
             'renewals_alert' => Renewal::all()->filter(

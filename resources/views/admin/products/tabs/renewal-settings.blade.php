@@ -1,30 +1,35 @@
-@php $setting = $product->renewalSetting; @endphp
+@php
+    $setting = $product->renewalSetting;
+    $plan = $product->subscriptionPlans->first();
+@endphp
 
 <div class="rounded-xl border border-app-border bg-white p-6">
-    <h2 class="text-lg font-semibold text-secondary-dark">Renewal Settings</h2>
-    <p class="text-sm text-secondary">
-        Default renewal terms applied to new projects created under this product
-    </p>
+    <h2 class="text-lg font-semibold text-secondary-dark">Subscription Plan</h2>
+    <p class="text-sm text-secondary">The plan clients are billed when subscribing to this product during onboarding.</p>
+
+    <div class="mt-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+        <div>
+            <p class="text-xs uppercase tracking-wide text-secondary">Plan Name</p>
+            <p class="mt-1 font-medium text-secondary-dark">{{ $plan?->name ?? '—' }}</p>
+        </div>
+        <div>
+            <p class="text-xs uppercase tracking-wide text-secondary">Duration</p>
+            <p class="mt-1 font-medium text-secondary-dark">{{ $plan ? $plan->duration_months . ' ' . Str::plural('month', $plan->duration_months) : '—' }}</p>
+        </div>
+        <div>
+            <p class="text-xs uppercase tracking-wide text-secondary">Amount</p>
+            <p class="mt-1 font-medium text-secondary-dark">{{ $plan ? '₹' . number_format($plan->amount, 2) : '—' }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="mt-6 rounded-xl border border-app-border bg-white p-6">
+    <h2 class="text-lg font-semibold text-secondary-dark">Reminders</h2>
+    <p class="text-sm text-secondary">Expiry reminder behaviour for all plans on this product</p>
 
     <form method="POST" action="{{ route('admin.products.renewal-settings.update', $product) }}" class="mt-6 space-y-5">
         @csrf
         @method('PUT')
-
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-                <x-input-label for="default_plan_duration_months" value="Default Plan Duration (months)" class="text-xs uppercase tracking-wide text-secondary" />
-                <x-text-input id="default_plan_duration_months" name="default_plan_duration_months" type="number" min="1" class="mt-1.5"
-                    placeholder="e.g. 12" :value="old('default_plan_duration_months', $setting?->default_plan_duration_months)" />
-                <x-input-error :messages="$errors->get('default_plan_duration_months')" class="mt-2" />
-            </div>
-
-            <div>
-                <x-input-label for="default_renewal_amount" value="Default Renewal Amount" class="text-xs uppercase tracking-wide text-secondary" />
-                <x-text-input id="default_renewal_amount" name="default_renewal_amount" type="number" min="0" step="0.01" class="mt-1.5"
-                    placeholder="e.g. 15000" :value="old('default_renewal_amount', $setting?->default_renewal_amount)" />
-                <x-input-error :messages="$errors->get('default_renewal_amount')" class="mt-2" />
-            </div>
-        </div>
 
         <div>
             <x-input-label for="reminder_before_days" value="Send Reminder Before Expiry (days)" class="text-xs uppercase tracking-wide text-secondary" />

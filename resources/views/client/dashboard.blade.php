@@ -68,8 +68,8 @@
                             <x-icon name="box" class="w-4 h-4" />
                         </span>
                         <div>
-                            <p class="text-sm font-medium text-secondary-dark">{{ $project->project_name }}</p>
-                            <p class="text-xs text-secondary">{{ $project->product->name }}</p>
+                            <p class="text-sm font-medium text-secondary-dark">{{ $project->product->name }}</p>
+                            <p class="text-xs text-secondary">{{ $project->brand_name ?? $project->project_name }}</p>
                         </div>
                     </div>
                     <div class="hidden text-xs text-secondary sm:block">{{ $docsDone }}/{{ $docsTotal }} docs · {{ $trainingDone }}/{{ $trainingTotal }} videos</div>

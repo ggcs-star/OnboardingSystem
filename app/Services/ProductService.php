@@ -9,6 +9,10 @@ use Illuminate\Http\UploadedFile;
 
 class ProductService
 {
+    public const DEFAULT_PLAN_NAME = 'Yearly';
+    public const DEFAULT_PLAN_DURATION_MONTHS = 12;
+    public const DEFAULT_PLAN_AMOUNT = 90000;
+
     public function __construct(private FileUploadService $fileUploadService)
     {
     }
@@ -28,6 +32,12 @@ class ProductService
                 'content' => null,
             ]);
         }
+
+        $product->subscriptionPlans()->create([
+            'name' => self::DEFAULT_PLAN_NAME,
+            'duration_months' => self::DEFAULT_PLAN_DURATION_MONTHS,
+            'amount' => self::DEFAULT_PLAN_AMOUNT,
+        ]);
 
         return $product;
     }

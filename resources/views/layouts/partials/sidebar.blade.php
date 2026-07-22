@@ -30,14 +30,17 @@
                 <x-sidebar-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" icon="grid">
                     <span x-show="!collapsed" x-cloak>Dashboard</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')" icon="folder">
-                    <span x-show="!collapsed" x-cloak>Projects</span>
-                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.clients.index')" :active="request()->routeIs('admin.clients.*')" icon="users">
                     <span x-show="!collapsed" x-cloak>Clients</span>
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.*')" icon="box">
                     <span x-show="!collapsed" x-cloak>Products</span>
+                </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
+                    <span x-show="!collapsed" x-cloak>Training</span>
+                </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.cheatsheets.index')" :active="request()->routeIs('admin.cheatsheets.*')" icon="file-text">
+                    <span x-show="!collapsed" x-cloak>Cheatsheets</span>
                 </x-sidebar-link>
             </div>
         </div>
@@ -45,20 +48,14 @@
         <div>
             <p x-show="!collapsed" x-cloak class="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-secondary">Operations</p>
             <div class="space-y-1">
-                <x-sidebar-link :href="route('admin.coming-soon', 'Support')" :active="request()->route('label') === 'Support'" icon="life-buoy">
+                <x-sidebar-link :href="route('admin.support.index')" :active="request()->routeIs('admin.support.*')" icon="life-buoy">
                     <span x-show="!collapsed" x-cloak>Support</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.coming-soon', 'Renewals')" :active="request()->route('label') === 'Renewals'" icon="refresh-cw">
-                    <span x-show="!collapsed" x-cloak>Renewals</span>
-                </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
-                    <span x-show="!collapsed" x-cloak>Training</span>
+                <x-sidebar-link :href="route('admin.sales-employees.index')" :active="request()->routeIs('admin.sales-employees.*')" icon="briefcase">
+                    <span x-show="!collapsed" x-cloak>Sales Team</span>
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.customization-requests.index')" :active="request()->routeIs('admin.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>
-                </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.documents.index')" :active="request()->routeIs('admin.documents.*')" icon="file-text">
-                    <span x-show="!collapsed" x-cloak>Documents</span>
                 </x-sidebar-link>
             </div>
         </div>
