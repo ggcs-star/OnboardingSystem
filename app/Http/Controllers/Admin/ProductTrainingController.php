@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreTrainingVideoRequest;
 use App\Models\Product;
 use App\Models\ProductTraining;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class ProductTrainingController extends Controller
 {
@@ -28,5 +30,18 @@ class ProductTrainingController extends Controller
         return redirect()
             ->route('admin.training.index')
             ->with('success', 'Training video removed.');
+    }
+
+    public function reorder(Request $request, Product $product): JsonResponse
+    {
+        $request->validate(['order' => ['required', 'array']]);
+
+        foreach ($request->input('order') as $index => $trainingId) {
+            ProductTraining::where('id', $trainingId)
+                ->where('product_id', $product->id)
+                ->update(['sort_order' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

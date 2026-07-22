@@ -41,11 +41,12 @@
                         </button>
                     </div>
 
-                    <div x-show="tab === 'videos'" class="space-y-3 p-5">
+                    <div x-show="tab === 'videos'" class="training-videos-list space-y-3 p-5" data-reorder-url="{{ route('admin.training-videos.reorder', $product) }}">
                         @forelse ($product->training as $video)
-                            <div class="rounded-lg border border-app-border p-4" x-data="{ playing: false }">
+                            <div draggable="true" data-id="{{ $video->id }}" class="cursor-move rounded-lg border border-app-border p-4" x-data="{ playing: false }">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex items-start gap-3">
+                                        <x-icon name="grip" class="mt-2 w-4 h-4 shrink-0 text-secondary/60" />
                                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
                                             <x-icon name="video" class="w-4 h-4" />
                                         </span>
@@ -218,4 +219,32 @@
             </div>
         </form>
     </x-modal>
+
+    <script>
+        (function () {
+            document.querySelectorAll('.training-videos-list').forEach((list) => {
+                let dragging = null;
+
+                list.addEventListener('dragstart', (e) => {
+                    dragging = e.target.closest('[data-id]');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                list.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const target = e.target.closest('[data-id]');
+                    if (!target || target === dragging) return;
+                    const rect = target.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / rect.height > 0.5;
+                    list.insertBefore(dragging, next ? target.nextSibling : target);
+                });
+
+                list.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const order = Array.from(list.querySelectorAll('[data-id]')).map((row) => row.dataset.id);
+                    axios.post(list.dataset.reorderUrl, { order }).catch(() => window.location.reload());
+                });
+            });
+        })();
+    </script>
 </x-admin-layout>
