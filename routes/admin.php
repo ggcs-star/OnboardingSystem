@@ -62,11 +62,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/training', [ProjectTrainingOverviewController::class, 'index'])->name('training.index');
     Route::post('/training-videos', [ProductTrainingController::class, 'store'])->name('training-videos.store');
     Route::delete('/training-videos/{training}', [ProductTrainingController::class, 'destroy'])->name('training-videos.destroy');
+    Route::post('/products/{product}/training-videos/reorder', [ProductTrainingController::class, 'reorder'])->name('training-videos.reorder');
 
     Route::get('/cheatsheets', [CheatsheetOverviewController::class, 'index'])->name('cheatsheets.index');
     Route::post('/cheatsheets', [ProductCheatsheetController::class, 'store'])->name('cheatsheets.store');
     Route::get('/cheatsheets/{cheatsheet}/download', [ProductCheatsheetController::class, 'download'])->name('cheatsheets.download');
     Route::delete('/cheatsheets/{cheatsheet}', [ProductCheatsheetController::class, 'destroy'])->name('cheatsheets.destroy');
+    Route::post('/products/{product}/cheatsheets/reorder', [ProductCheatsheetController::class, 'reorder'])->name('cheatsheets.reorder');
 
     Route::get('/customization-requests', [CustomizationRequestOverviewController::class, 'index'])->name('customization-requests.index');
 
