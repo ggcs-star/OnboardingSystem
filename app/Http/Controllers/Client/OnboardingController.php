@@ -26,13 +26,23 @@ class OnboardingController extends Controller
     {
         $client = $request->user()->client;
 
-        $projectsByProduct = $client ? $client->projects->groupBy('product_id') : collect();
+        $assignedProducts = $client
+            ? $client->products()->where('active', true)->orderBy('name')->get()
+            : collect();
 
-        $products = Product::where('active', true)->orderBy('name')->get();
+        $otherProducts = Product::where('active', true)
+            ->whereNotIn('id', $assignedProducts->pluck('id'))
+            ->orderBy('name')
+            ->get();
+
+        $projectsByProduct = $client
+            ? $client->projects->groupBy('product_id')
+            : collect();
 
         return view('client.onboarding.index', [
             'client' => $client,
-            'products' => $products,
+            'assignedProducts' => $assignedProducts,
+            'otherProducts' => $otherProducts,
             'projectsByProduct' => $projectsByProduct,
         ]);
     }

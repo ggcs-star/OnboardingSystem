@@ -24,6 +24,10 @@ class Project extends Model
     public const DOCUMENT_STATUSES = ['pending', 'submitted', 'approved', 'rejected'];
 
     protected $fillable = [
+           
+   
+    'client_product_id',
+    
         'product_id',
         'client_id',
         'project_name',
@@ -46,15 +50,20 @@ class Project extends Model
         'documents' => 'array',
     ];
 
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
+   public function product(): BelongsTo
+{
+    return $this->belongsTo(Product::class);
+}
 
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
+public function client(): BelongsTo
+{
+    return $this->belongsTo(Client::class);
+}
+
+public function clientProduct(): BelongsTo
+{
+    return $this->belongsTo(ClientProduct::class);
+}
 
     public function manager(): BelongsTo
     {

@@ -12,7 +12,7 @@ use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-
+use App\Models\Product;
 class ClientController extends Controller
 {
     public function __construct(
@@ -23,21 +23,27 @@ class ClientController extends Controller
 
     public function index(Request $request): View
     {
+        $products = Product::where('active', true)
+            ->orderBy('name')
+            ->get();
         $clients = Client::with(['user', 'projects'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('company_name', 'like', "%{$search}%")
                         ->orWhere('owner_name', 'like', "%{$search}%")
-                        ->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$search}%"));
+                        ->orWhereHas('user', fn($u) => $u->where('email', 'like', "%{$search}%"));
                 });
             })
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->when($request->filled('status'), fn($query) => $query->where('status', $request->string('status')))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.clients.index', ['clients' => $clients]);
+        return view('admin.clients.index', [
+            'clients' => $clients,
+            'products' => $products,
+        ]);
     }
 
     public function store(StoreClientRequest $request): RedirectResponse
@@ -53,7 +59,7 @@ class ClientController extends Controller
 
         $tabs = ['overview', 'projects', 'documents'];
         $activeTab = $request->query('tab', 'overview');
-        if (! in_array($activeTab, $tabs, true)) {
+        if (!in_array($activeTab, $tabs, true)) {
             $activeTab = 'overview';
         }
 
@@ -86,7 +92,7 @@ class ClientController extends Controller
                 $brands = $productProjects->map(function (Project $project) {
                     $groups = $project->documentEntries()
                         ->groupBy('group_slug')
-                        ->map(fn ($groupEntries) => (object) [
+                        ->map(fn($groupEntries) => (object) [
                             'label' => $groupEntries->first()->group_label,
                             'mandatory' => $groupEntries->first()->group_mandatory,
                             'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
@@ -113,7 +119,7 @@ class ClientController extends Controller
             ->values();
 
         $renewalStatuses = $client->projects->mapWithKeys(
-            fn (Project $project) => [$project->id => $this->renewalService->statusFor($project->renewal)]
+            fn(Project $project) => [$project->id => $this->renewalService->statusFor($project->renewal)]
         );
 
         return view('admin.clients.show', [

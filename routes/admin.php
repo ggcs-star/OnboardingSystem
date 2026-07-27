@@ -19,7 +19,8 @@ use App\Http\Controllers\Admin\ProjectTrainingOverviewController;
 use App\Http\Controllers\Admin\SalesEmployeeController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\ProductInquiryController;
+use App\Http\Controllers\Admin\InquiryController;
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -80,4 +81,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/coming-soon/{label?}', function (?string $label = 'This section') {
         return view('admin.coming-soon', ['label' => $label]);
     })->name('coming-soon');
+    Route::get('/product-inquiry',[ProductInquiryController::class,'index'])->name('product.inquiry.index');
+    Route::patch('/inquiries/{id}/status', [InquiryController::class, 'updateStatus'])->name('inquiries.update-status');
 });
