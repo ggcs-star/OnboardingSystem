@@ -83,4 +83,28 @@ class Product extends Model
     {
         return $this->image ? asset('storage/' . $this->image) : null;
     }
+
+    public function clients()
+{
+    return $this->belongsToMany(
+        Client::class,
+        'client_products'
+    )
+    ->withPivot([
+        'status',
+        'assigned_by',
+        'assigned_at'
+    ])
+    ->withTimestamps();
+}
+
+public function clientProducts()
+{
+    return $this->hasMany(ClientProduct::class);
+}
+
+public function inquiries()
+{
+    return $this->hasMany(ProductInquiry::class);
+}
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\Client\SupportTicketController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Client\TrainingProgressController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Client\ClientProductInquiryController;
 
 Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('client.')->group(function () {
 
@@ -57,4 +58,6 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::post('/support', [SupportTicketController::class, 'store'])->name('support.store');
     Route::get('/support/{supportTicket}', [SupportTicketController::class, 'show'])->name('support.show');
     Route::post('/support/{supportTicket}/messages', [SupportTicketController::class, 'reply'])->name('support.messages.store');
+
+    Route::post('/product-inquiry',[ClientProductInquiryController::class,'store'])->name('product.inquiry.store');
 });

@@ -23,6 +23,8 @@ class StoreClientRequest extends FormRequest
             'city' => ['nullable', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:255'],
+             'products'     => ['required', 'array', 'min:1'],
+        'products.*'   => ['exists:products,id'],
         ];
     }
 }
