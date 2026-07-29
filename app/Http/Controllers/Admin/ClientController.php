@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreClientRequest;
+use App\Http\Requests\Admin\UpdateClientRequest;
 use App\Models\Client;
-use App\Models\Project;
-use App\Models\SalesEmployee;
 use App\Services\ClientService;
 use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +25,7 @@ class ClientController extends Controller
         $products = Product::where('active', true)
             ->orderBy('name')
             ->get();
-        $clients = Client::with(['user', 'projects'])
+        $clients = Client::with(['user', 'projects.product.documentGroups.fields', 'products.documentGroups.fields'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -53,82 +52,37 @@ class ClientController extends Controller
         return redirect()->route('admin.clients.index')->with('success', 'Client added successfully.');
     }
 
-    public function show(Request $request, Client $client): View
+    public function show(Client $client): View
     {
-        $client->load(['user', 'projects.product', 'projects.renewal.history', 'projects.salesEmployee']);
-
-        $tabs = ['overview', 'projects', 'documents'];
-        $activeTab = $request->query('tab', 'overview');
-        if (!in_array($activeTab, $tabs, true)) {
-            $activeTab = 'overview';
-        }
-
-        $projectsByProduct = $client->projects
-            ->groupBy('product_id')
-            ->map(function ($productProjects) {
-                $firstProject = $productProjects->first();
-                [$videosDone, $videosTotal] = $firstProject->trainingProgressCount();
-
-                return (object) [
-                    'product' => $firstProject->product,
-                    'videosDone' => $videosDone,
-                    'videosTotal' => $videosTotal,
-                    'projects' => $productProjects->map(function (Project $project) {
-                        [$docsDone, $docsTotal] = $project->documentsProgress();
-
-                        return (object) [
-                            'project' => $project,
-                            'docsDone' => $docsDone,
-                            'docsTotal' => $docsTotal,
-                        ];
-                    })->values(),
-                ];
-            })
-            ->values();
-
-        $products = $client->projects
-            ->groupBy('product_id')
-            ->map(function ($productProjects) {
-                $brands = $productProjects->map(function (Project $project) {
-                    $groups = $project->documentEntries()
-                        ->groupBy('group_slug')
-                        ->map(fn($groupEntries) => (object) [
-                            'label' => $groupEntries->first()->group_label,
-                            'mandatory' => $groupEntries->first()->group_mandatory,
-                            'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
-                                $entry->project = $project;
-
-                                return $entry;
-                            }),
-                            'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
-                        ]);
-
-                    return (object) [
-                        'project' => $project,
-                        'groups' => $groups,
-                        'pending' => $groups->sum('pending'),
-                    ];
-                })->values();
-
-                return (object) [
-                    'product' => $productProjects->first()->product,
-                    'brands' => $brands,
-                    'pending' => $brands->sum('pending'),
-                ];
-            })
-            ->values();
-
-        $renewalStatuses = $client->projects->mapWithKeys(
-            fn(Project $project) => [$project->id => $this->renewalService->statusFor($project->renewal)]
-        );
+        $client->load('user');
 
         return view('admin.clients.show', [
             'client' => $client,
-            'activeTab' => $activeTab,
-            'products' => $products,
-            'projectsByProduct' => $projectsByProduct,
-            'renewalStatuses' => $renewalStatuses,
-            'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
         ]);
+    }
+
+    public function update(UpdateClientRequest $request, Client $client): RedirectResponse
+    {
+        $this->clientService->updateClient($client, $request->validated());
+
+        return back()->with('success', 'Client updated.');
+    }
+
+    public function toggleStatus(Client $client): RedirectResponse
+    {
+        $this->clientService->toggleStatus($client);
+
+        return back()->with('success', 'Client status updated.');
+    }
+
+    public function destroy(Client $client): RedirectResponse
+    {
+        if ($client->projects()->where('status', 'active')->exists()) {
+            return back()->with('error', 'This client has an active project — deactivate the client instead of deleting.');
+        }
+
+        $this->clientService->deleteClient($client);
+
+        return redirect()->route('admin.clients.index')->with('success', 'Client deleted.');
     }
 }

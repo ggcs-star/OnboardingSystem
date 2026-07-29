@@ -69,7 +69,7 @@ class ProjectService
 
         $project->update(['current_stage' => $stage]);
 
-        if ($stage === 'live') {
+        if ($stage === 'application_live') {
             $project->update(['actual_live_date' => Carbon::today()]);
             $this->renewalService->createForProject($project);
         }

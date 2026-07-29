@@ -23,7 +23,7 @@
             class="rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
             <option value="">All Statuses</option>
             <option value="active" @selected(request('status') === 'active')>Active</option>
-            <option value="blocked" @selected(request('status') === 'blocked')>Blocked</option>
+            <option value="blocked" @selected(request('status') === 'blocked')>Inactive</option>
         </select>
         <button type="submit" class="hidden"></button>
     </form>
@@ -39,15 +39,13 @@
                     <th class="px-4 py-3">Projects</th>
                     <th class="px-4 py-3">Onboarded</th>
                     <th class="px-4 py-3">Pending Docs</th>
-                    <th class="px-4 py-3 text-right">Projects</th>
-                    <th class="px-4 py-3 text-right">Docs</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-app-border">
                 @forelse ($clients as $client)
                     @php
                         $activeProjects = $client->projects->where('status', 'active')->count();
-                        $pendingDocs = $client->projects->flatMap->documentEntries()->where('status', '!=', 'approved')->count();
+                        $docsSummary = $client->documentsSummary();
                     @endphp
                     <tr>
                         <td class="px-4 py-3">
@@ -68,7 +66,7 @@
                         </td>
                         <td class="px-4 py-3">
                             @php $statusBadge = $client->status === 'active' ? 'bg-success-light text-success' : ($client->status === 'blocked' ? 'bg-danger-light text-danger' : 'bg-warning-light text-warning'); @endphp
-                            <x-badge :classes="$statusBadge" dot>{{ ucfirst($client->status) }}</x-badge>
+                            <x-badge :classes="$statusBadge" dot>{{ $client->status === 'blocked' ? 'Inactive' : ucfirst($client->status) }}</x-badge>
                         </td>
                         <td class="px-4 py-3 text-secondary-dark">
                             {{ $client->projects->count() }} <span class="text-xs text-secondary">({{ $activeProjects }}
@@ -76,30 +74,30 @@
                         </td>
                         <td class="px-4 py-3 text-secondary">{{ $client->created_at->format('d-M-Y') }}</td>
                         <td class="px-4 py-3">
-                            @if ($pendingDocs > 0)
-                                <span class="font-medium text-warning">{{ $pendingDocs }}</span>
+                            @if ($docsSummary->total === 0)
+                                <span class="text-secondary">—</span>
                             @else
-                                <span class="text-success">All done</span>
+                                <div class="group relative inline-block">
+                                    <span class="font-medium {{ $docsSummary->pending > 0 ? 'text-warning' : 'text-success' }}">
+                                        {{ $docsSummary->done }}/{{ $docsSummary->total }}
+                                    </span>
+                                    @if (!empty($docsSummary->breakdown))
+                                        <div class="pointer-events-none absolute left-0 top-full z-10 mt-1 hidden w-56 rounded-lg border border-app-border bg-white p-2 text-xs shadow-lg group-hover:block">
+                                            @foreach ($docsSummary->breakdown as $item)
+                                                <p class="flex items-center justify-between gap-2 py-0.5">
+                                                    <span class="truncate text-secondary-dark">{{ $item['label'] }}</span>
+                                                    <span class="shrink-0 font-medium text-warning">{{ $item['pending'] }} left</span>
+                                                </p>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
                             @endif
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'projects']) }}"
-                                class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
-                                title="View projects">
-                                <x-icon name="folder" class="w-4 h-4" />
-                            </a>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <a href="{{ route('admin.clients.show', ['client' => $client, 'tab' => 'documents']) }}"
-                                class="inline-flex items-center justify-center rounded-lg border border-app-border p-2 text-secondary hover:bg-surface-alt hover:text-primary"
-                                title="View documents">
-                                <x-icon name="file-text" class="w-4 h-4" />
-                            </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="px-4 py-8 text-center text-secondary">No clients yet.</td>
+                        <td colspan="7" class="px-4 py-8 text-center text-secondary">No clients yet.</td>
                     </tr>
                 @endforelse
             </tbody>

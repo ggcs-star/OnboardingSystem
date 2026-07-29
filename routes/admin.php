@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ProductCheatsheetController;
 use App\Http\Controllers\Admin\ProductPolicyController;
 use App\Http\Controllers\Admin\ProductRenewalSettingController;
 use App\Http\Controllers\Admin\ProductTrainingController;
+use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectDocumentController;
 use App\Http\Controllers\Admin\ProjectSalesAssignmentController;
 use App\Http\Controllers\Admin\ProjectTrainingOverviewController;
@@ -47,6 +48,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
     Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::put('/clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+    Route::patch('/clients/{client}/status', [ClientController::class, 'toggleStatus'])->name('clients.status.toggle');
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::patch('/projects/{project}/stage', [ProjectController::class, 'updateStage'])->name('projects.stage.update');
 
     Route::patch('/projects/{project}/documents/{group}/{field}', [ProjectDocumentController::class, 'update'])->name('projects.documents.update');
     Route::patch('/projects/{project}/customization-requests/{customizationRequest}', [CustomizationRequestController::class, 'update'])->name('projects.customization-requests.update');

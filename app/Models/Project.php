@@ -14,11 +14,11 @@ class Project extends Model
     use HasFactory;
 
     public const STAGES = [
-        'documents' => 'Document Template',
+        'documents' => 'Documents',
         'development' => 'Development',
         'testing' => 'Testing',
-        'training' => 'Client Training',
-        'live' => 'Live',
+        'web_live' => 'Web Live',
+        'application_live' => 'Application Live',
     ];
 
     public const DOCUMENT_STATUSES = ['pending', 'submitted', 'approved', 'rejected'];

@@ -39,7 +39,7 @@
 
     <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         <x-stat-card label="Products" :value="$productStats['total']" :hint="$productStats['active'] . ' active'" tint="primary" icon="box" />
-        <x-stat-card label="Clients" :value="$clientStats['total']" :hint="$clientStats['active'] . ' active · ' . $clientStats['blocked'] . ' blocked'" tint="teal" icon="users" />
+        <x-stat-card label="Clients" :value="$clientStats['total']" :hint="$clientStats['active'] . ' active · ' . $clientStats['blocked'] . ' inactive'" tint="teal" icon="users" />
         <x-stat-card label="Active Projects" :value="$projectStats['active_projects']" :hint="$projectStats['total_projects'] . ' total'" tint="success" icon="folder" />
         <x-stat-card label="Documents Pending" :value="$projectStats['documents_pending']" hint="projects need attention" tint="warning" icon="file-text" />
         <x-stat-card label="Open Tickets" :value="$projectStats['open_support_tickets']" hint="unresolved" tint="violet" icon="life-buoy" />

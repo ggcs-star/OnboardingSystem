@@ -267,6 +267,12 @@
             <form method="POST" action="{{ route('login') }}" class="mt-8 sm:mt-10">
                 @csrf
 
+                @if ($errors->any())
+                    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
                 <!-- EMAIL -->
                 <div>
                     <label class="font-semibold text-gray-700 text-sm sm:text-base">Email Address</label>

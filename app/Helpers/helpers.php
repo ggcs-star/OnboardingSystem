@@ -42,8 +42,8 @@ if (! function_exists('project_stage_badge')) {
         return match ($stage) {
             'development' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Development'],
             'testing' => ['classes' => 'bg-warning-light text-warning', 'label' => 'Testing'],
-            'training' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Training'],
-            'live' => ['classes' => 'bg-success-light text-success', 'label' => 'Go Live'],
+            'web_live' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Web Live'],
+            'application_live' => ['classes' => 'bg-success-light text-success', 'label' => 'Application Live'],
             default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Documents'],
         };
     }
