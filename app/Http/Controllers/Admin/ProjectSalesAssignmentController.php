@@ -17,8 +17,6 @@ class ProjectSalesAssignmentController extends Controller
 
         $project->update(['sales_employee_id' => $data['sales_employee_id'] ?? null]);
 
-        return redirect()
-            ->route('admin.clients.show', ['client' => $project->client_id, 'tab' => 'overview'])
-            ->with('success', 'Salesperson updated for ' . ($project->brand_name ?? $project->project_name) . '.');
+        return back()->with('success', 'Salesperson updated for ' . ($project->brand_name ?? $project->project_name) . '.');
     }
 }

@@ -69,7 +69,7 @@ class ProjectService
 
         $project->update(['current_stage' => $stage]);
 
-        if ($stage === 'live') {
+        if ($stage === 'application_live') {
             $project->update(['actual_live_date' => Carbon::today()]);
             $this->renewalService->createForProject($project);
         }
@@ -79,7 +79,18 @@ class ProjectService
 
     public function toggleBlocked(Project $project): Project
     {
+        if ($project->status === 'inactive') {
+            return $project;
+        }
+
         $project->update(['status' => $project->status === 'blocked' ? 'active' : 'blocked']);
+
+        return $project->fresh();
+    }
+
+    public function updateStatus(Project $project, string $status): Project
+    {
+        $project->update(['status' => $status]);
 
         return $project->fresh();
     }

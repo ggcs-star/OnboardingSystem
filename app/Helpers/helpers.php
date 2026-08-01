@@ -39,12 +39,31 @@ if (! function_exists('project_stage_badge')) {
             return ['classes' => 'bg-danger-light text-danger', 'label' => 'On Hold'];
         }
 
+        if ($status === 'inactive') {
+            return ['classes' => 'bg-danger-light text-danger', 'label' => 'Inactive'];
+        }
+
         return match ($stage) {
             'development' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Development'],
             'testing' => ['classes' => 'bg-warning-light text-warning', 'label' => 'Testing'],
-            'training' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Training'],
-            'live' => ['classes' => 'bg-success-light text-success', 'label' => 'Go Live'],
+            'web_live' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Web Live'],
+            'application_live' => ['classes' => 'bg-success-light text-success', 'label' => 'Application Live'],
             default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Documents'],
+        };
+    }
+}
+
+if (! function_exists('project_status_badge')) {
+    /**
+     * Tailwind classes + label for a project's plain Active/On Hold/Inactive
+     * status, independent of pipeline stage.
+     */
+    function project_status_badge(string $status): array
+    {
+        return match ($status) {
+            'blocked' => ['classes' => 'bg-warning-light text-warning', 'label' => 'On Hold'],
+            'inactive' => ['classes' => 'bg-danger-light text-danger', 'label' => 'Inactive'],
+            default => ['classes' => 'bg-success-light text-success', 'label' => 'Active'],
         };
     }
 }

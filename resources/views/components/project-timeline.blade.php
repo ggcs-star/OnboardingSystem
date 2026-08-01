@@ -1,11 +1,13 @@
-@props(['stage', 'status' => 'active', 'templateDefined' => true])
+@props(['stage', 'status' => 'active', 'templateDefined' => true, 'showLabels' => false])
 
 @php
     $stages = array_keys(\App\Models\Project::STAGES);
     $currentIndex = array_search($stage, $stages, true) ?: 0;
+    $dotSize = $showLabels ? 'h-9 w-9 text-xs' : 'h-6 w-6 text-[10px]';
+    $iconSize = $showLabels ? 'w-4 h-4' : 'w-3 h-3';
 @endphp
 
-<div class="flex items-center">
+<div class="flex items-start">
     @foreach ($stages as $index => $key)
         @php
             $isDone = $index < $currentIndex;
@@ -15,21 +17,29 @@
         @endphp
 
         @if ($index > 0)
-            <span class="h-px w-4 {{ $isDone || $isCurrent ? 'bg-success' : 'bg-app-border' }}"></span>
+            <span class="mt-4 h-px w-6 shrink-0 {{ $isDone || $isCurrent ? 'bg-success' : 'bg-app-border' }} {{ $showLabels ? 'sm:w-10' : '' }}"></span>
         @endif
 
-        <span
-            title="{{ $isMissingTemplate ? 'No document template defined for this product yet' : \App\Models\Project::STAGES[$key] }}"
-            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold
-                {{ $isMissingTemplate ? 'bg-warning text-white' : ($isDone ? 'bg-success text-white' : ($isBlocked ? 'bg-danger text-white' : ($isCurrent ? 'bg-primary text-white' : 'bg-secondary-light text-secondary'))) }}"
-        >
-            @if ($isMissingTemplate)
-                <x-icon name="alert" class="w-3 h-3" />
-            @elseif ($isDone)
-                <x-icon name="check" class="w-3 h-3" />
-            @else
-                {{ Str::upper(Str::substr($key, 0, 1)) }}
+        <div class="flex flex-col items-center {{ $showLabels ? 'w-16' : '' }}">
+            <span
+                title="{{ $isMissingTemplate ? 'No document template defined for this product yet' : \App\Models\Project::STAGES[$key] }}"
+                class="flex {{ $dotSize }} shrink-0 items-center justify-center rounded-full font-semibold ring-4
+                    {{ $isMissingTemplate ? 'bg-warning text-white ring-warning-light' : ($isDone ? 'bg-success text-white ring-success-light' : ($isBlocked ? 'bg-danger text-white ring-danger-light' : ($isCurrent ? 'bg-primary text-white ring-primary-light' : 'bg-secondary-light text-secondary ring-transparent'))) }}"
+            >
+                @if ($isMissingTemplate)
+                    <x-icon name="alert" class="{{ $iconSize }}" />
+                @elseif ($isDone)
+                    <x-icon name="check" class="{{ $iconSize }}" />
+                @else
+                    {{ Str::upper(Str::substr($key, 0, 1)) }}
+                @endif
+            </span>
+
+            @if ($showLabels)
+                <span class="mt-2 text-center text-[11px] font-medium leading-tight {{ $isCurrent ? 'text-secondary-dark' : 'text-secondary' }}">
+                    {{ \App\Models\Project::STAGES[$key] }}
+                </span>
             @endif
-        </span>
+        </div>
     @endforeach
 </div>

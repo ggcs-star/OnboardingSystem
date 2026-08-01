@@ -61,5 +61,67 @@ public function projects(): HasMany
 {
     return $this->hasMany(ProductInquiry::class);
 }
+
+    /**
+     * Document progress across every assigned product. Products the client
+     * hasn't started onboarding yet (no Project created) count as fully
+     * pending, using the product's current document field count. A project
+     * can also exist for a product no longer in the client_products pivot,
+     * so both sources are unioned.
+     */
+    public function documentsSummary(): object
+    {
+        $this->loadMissing(['products.documentGroups.fields', 'projects.product.documentGroups.fields']);
+
+        $projectsByProduct = $this->projects->groupBy('product_id');
+        $productsById = $this->products->keyBy('id');
+
+        $productIds = $productsById->keys()->merge($projectsByProduct->keys())->unique();
+
+        $done = 0;
+        $total = 0;
+        $breakdown = [];
+
+        foreach ($productIds as $productId) {
+            $projects = $projectsByProduct->get($productId, collect());
+
+            if ($projects->isEmpty()) {
+                $product = $productsById->get($productId);
+                $fieldsTotal = $product?->documentGroups->sum(fn ($group) => $group->fields->count()) ?? 0;
+
+                $total += $fieldsTotal;
+
+                if ($fieldsTotal > 0) {
+                    $breakdown[] = ['product' => $product->name, 'brand' => null, 'pending' => $fieldsTotal, 'total' => $fieldsTotal];
+                }
+
+                continue;
+            }
+
+            foreach ($projects as $project) {
+                [$projectDone, $projectTotal] = $project->documentsProgress();
+
+                $done += $projectDone;
+                $total += $projectTotal;
+
+                $pending = $projectTotal - $projectDone;
+                if ($pending > 0) {
+                    $breakdown[] = [
+                        'product' => $project->product?->name,
+                        'brand' => $project->brand_name ?? $project->project_name,
+                        'pending' => $pending,
+                        'total' => $projectTotal,
+                    ];
+                }
+            }
+        }
+
+        return (object) [
+            'done' => $done,
+            'total' => $total,
+            'pending' => $total - $done,
+            'breakdown' => $breakdown,
+        ];
+    }
 }
 

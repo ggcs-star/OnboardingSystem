@@ -43,10 +43,10 @@ class ProjectSeeder extends Seeder
         $rapidRetail = Product::where('name', 'Rapid Retail')->firstOrFail();
 
         $projectsData = [
-            ['name' => 'AajTak City', 'product' => $localPulse, 'client' => $clients['aajtak'], 'stage' => 'live', 'docs' => 'all', 'training' => 'all', 'sales' => 'Joydeep'],
+            ['name' => 'AajTak City', 'product' => $localPulse, 'client' => $clients['aajtak'], 'stage' => 'application_live', 'docs' => 'all', 'training' => 'all', 'sales' => 'Joydeep'],
             ['name' => 'Samachar City', 'product' => $localPulse, 'client' => $clients['abc_media'], 'stage' => 'development', 'docs' => 'most', 'training' => 'some'],
             ['name' => 'Saurashtra Bhumi', 'product' => $localPulse, 'client' => $clients['abc_media'], 'stage' => 'documents', 'docs' => 'few', 'training' => 'none'],
-            ['name' => 'SSB Travel Updates', 'product' => $localPulse, 'client' => $clients['ssb_travel'], 'stage' => 'live', 'docs' => 'all', 'training' => 'all'],
+            ['name' => 'SSB Travel Updates', 'product' => $localPulse, 'client' => $clients['ssb_travel'], 'stage' => 'application_live', 'docs' => 'all', 'training' => 'all'],
             ['name' => 'ABC School', 'product' => $schoolErp, 'client' => $clients['abc_school'], 'stage' => 'development', 'docs' => 'most', 'training' => 'few'],
             ['name' => 'XYZ School Portal', 'product' => $schoolErp, 'client' => $clients['xyz_education'], 'stage' => 'documents', 'docs' => 'few', 'training' => 'none'],
             [
@@ -58,7 +58,7 @@ class ProjectSeeder extends Seeder
             ],
             [
                 'name' => 'Raj Restaurant', 'product' => $restaurantPos, 'client' => $clients['raj_restaurant'],
-                'stage' => 'training', 'docs' => 'most', 'training' => 'some', 'sales' => 'Karan Vora',
+                'stage' => 'web_live', 'docs' => 'most', 'training' => 'some', 'sales' => 'Karan Vora',
                 'tickets' => [
                     ['category' => 'training', 'message' => 'Where can we watch the billing training video again?', 'reply' => 'You can find it under Training > Billing & Payments — it stays available any time.', 'status' => 'resolved'],
                     ['category' => 'help', 'message' => 'We need help setting up a second outlet.'],
@@ -85,7 +85,7 @@ class ProjectSeeder extends Seeder
                 'name' => 'ABC Retail Hub',
                 'product' => $rapidRetail,
                 'client' => $clients['abc_media'],
-                'stage' => 'live',
+                'stage' => 'application_live',
                 'docs' => 'all',
                 'training' => 'all',
                 'sales' => 'Joydeep',
@@ -173,8 +173,8 @@ class ProjectSeeder extends Seeder
             'documents' => ['docs' => 'few', 'training' => 'none'],
             'development' => ['docs' => 'most', 'training' => 'few'],
             'testing' => ['docs' => 'most', 'training' => 'some'],
-            'training' => ['docs' => 'most', 'training' => 'some'],
-            'live' => ['docs' => 'all', 'training' => 'all'],
+            'web_live' => ['docs' => 'most', 'training' => 'some'],
+            'application_live' => ['docs' => 'all', 'training' => 'all'],
         ];
 
         return ['stage' => $stage, ...$levelsByStage[$stage]];

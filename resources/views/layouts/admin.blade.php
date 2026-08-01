@@ -22,6 +22,23 @@
                             </div>
                         @endif
 
+                        @if (session('error'))
+                            <div class="mb-6 rounded-lg border border-danger/20 bg-danger-light px-4 py-3 text-sm font-medium text-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="mb-6 rounded-lg border border-danger/20 bg-danger-light px-4 py-3 text-sm text-danger">
+                                <p class="font-medium">Please fix the following:</p>
+                                <ul class="mt-1 list-inside list-disc">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         {{ $slot }}
                     </div>
                 </main>
