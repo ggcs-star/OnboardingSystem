@@ -92,7 +92,7 @@ public function projects(): HasMany
                 $total += $fieldsTotal;
 
                 if ($fieldsTotal > 0) {
-                    $breakdown[] = ['label' => $product->name, 'pending' => $fieldsTotal];
+                    $breakdown[] = ['product' => $product->name, 'brand' => null, 'pending' => $fieldsTotal, 'total' => $fieldsTotal];
                 }
 
                 continue;
@@ -106,7 +106,12 @@ public function projects(): HasMany
 
                 $pending = $projectTotal - $projectDone;
                 if ($pending > 0) {
-                    $breakdown[] = ['label' => $project->brand_name ?? $project->project_name, 'pending' => $pending];
+                    $breakdown[] = [
+                        'product' => $project->product?->name,
+                        'brand' => $project->brand_name ?? $project->project_name,
+                        'pending' => $pending,
+                        'total' => $projectTotal,
+                    ];
                 }
             }
         }

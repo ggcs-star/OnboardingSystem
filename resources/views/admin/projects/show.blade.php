@@ -56,6 +56,40 @@
                 </div>
             </div>
 
+        </div>
+
+        <div class="space-y-6">
+            <div class="rounded-xl border border-app-border bg-white p-6">
+                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Progress</h2>
+                <div class="mt-4 space-y-4">
+                    <x-charts.meter label="Documents submitted" icon="file-text" :done="$docsDone" :total="$docsTotal" />
+                    <x-charts.meter label="Training videos" icon="play-circle" :done="$videosDone" :total="$videosTotal" />
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-app-border bg-white p-6">
+                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Client Support Contact</h2>
+                <p class="mt-2 text-sm font-medium text-secondary-dark">{{ $project->contactName() }}</p>
+                <p class="text-sm text-secondary">{{ $project->contactPhone() ?: 'No contact number on file' }}</p>
+            </div>
+
+            <div class="rounded-xl border border-app-border bg-white p-6">
+                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Sold By</h2>
+                <form method="POST" action="{{ route('admin.projects.sales-employee.update', $project) }}" class="mt-3">
+                    @csrf
+                    @method('PATCH')
+                    <select name="sales_employee_id" onchange="this.form.submit()"
+                        class="w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                        <option value="">Not attributed</option>
+                        @foreach ($salesEmployees as $salesEmployee)
+                            <option value="{{ $salesEmployee->id }}" @selected($project->sales_employee_id === $salesEmployee->id)>
+                                {{ $salesEmployee->name }} · {{ $salesEmployee->phone }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+            </div>
+
             <div class="rounded-xl border border-app-border bg-white p-6">
                 <h2 class="text-sm font-semibold uppercase tracking-wide text-secondary">Subscription &amp; Renewal</h2>
                 @if (! $project->renewal || ! $project->renewal->product_subscription_plan_id)
@@ -75,7 +109,7 @@
                         @endif
                     </div>
 
-                    <div class="mt-3 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+                    <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <p class="text-xs uppercase tracking-wide text-secondary">Amount</p>
                             <p class="mt-1 font-medium text-secondary-dark">₹{{ number_format($renewal->renewal_amount, 2) }}</p>
@@ -117,39 +151,6 @@
                         </div>
                     @endif
                 @endif
-            </div>
-        </div>
-
-        <div class="space-y-6">
-            <div class="rounded-xl border border-app-border bg-white p-6">
-                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Progress</h2>
-                <div class="mt-4 space-y-4">
-                    <x-charts.meter label="Documents submitted" icon="file-text" :done="$docsDone" :total="$docsTotal" />
-                    <x-charts.meter label="Training videos" icon="play-circle" :done="$videosDone" :total="$videosTotal" />
-                </div>
-            </div>
-
-            <div class="rounded-xl border border-app-border bg-white p-6">
-                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Client Support Contact</h2>
-                <p class="mt-2 text-sm font-medium text-secondary-dark">{{ $project->contactName() }}</p>
-                <p class="text-sm text-secondary">{{ $project->contactPhone() ?: 'No contact number on file' }}</p>
-            </div>
-
-            <div class="rounded-xl border border-app-border bg-white p-6">
-                <h2 class="text-xs font-semibold uppercase tracking-wide text-secondary">Sold By</h2>
-                <form method="POST" action="{{ route('admin.projects.sales-employee.update', $project) }}" class="mt-3">
-                    @csrf
-                    @method('PATCH')
-                    <select name="sales_employee_id" onchange="this.form.submit()"
-                        class="w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
-                        <option value="">Not attributed</option>
-                        @foreach ($salesEmployees as $salesEmployee)
-                            <option value="{{ $salesEmployee->id }}" @selected($project->sales_employee_id === $salesEmployee->id)>
-                                {{ $salesEmployee->name }} · {{ $salesEmployee->phone }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
             </div>
         </div>
     </div>

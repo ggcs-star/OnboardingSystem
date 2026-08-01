@@ -53,7 +53,6 @@
                 @forelse ($projects as $project)
                     @php
                         [$docsDone, $docsTotal] = $project->documentsProgress();
-                        $stageBadge = project_stage_badge($project->current_stage, $project->status);
                     @endphp
                     <tr class="cursor-pointer hover:bg-surface-alt" onclick="window.location = '{{ route('admin.projects.show', $project) }}'">
                         <td class="px-4 py-3">
@@ -67,7 +66,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-3">
-                            <x-badge :classes="$stageBadge['classes']" dot>{{ $stageBadge['label'] }}</x-badge>
+                            <x-project-timeline :stage="$project->current_stage" :status="$project->status" />
                         </td>
                     </tr>
                 @empty
