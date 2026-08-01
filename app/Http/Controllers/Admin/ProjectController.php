@@ -51,35 +51,27 @@ class ProjectController extends Controller
     {
         $project->load(['client', 'product', 'salesEmployee', 'renewal.history']);
 
+        $entries = $project->documentEntries();
+        $statusCounts = $entries->countBy('status');
+
         [$docsDone, $docsTotal] = $project->documentsProgress();
         [$videosDone, $videosTotal] = $project->trainingProgressCount();
 
-        $groups = $project->documentEntries()
-            ->groupBy('group_slug')
-            ->map(fn ($groupEntries) => (object) [
+        $overallTotal = $docsTotal + $videosTotal;
+        $overallPct = $overallTotal > 0 ? (int) round((($docsDone + $videosDone) / $overallTotal) * 100) : 0;
+
+        $groups = $entries->groupBy('group_slug')->map(function ($groupEntries, $slug) {
+            $total = $groupEntries->count();
+            $submitted = $groupEntries->whereIn('status', ['submitted', 'approved'])->count();
+
+            return (object) [
+                'slug' => $slug,
                 'label' => $groupEntries->first()->group_label,
                 'mandatory' => $groupEntries->first()->group_mandatory,
-                'entries' => $groupEntries->values()->map(function ($entry) use ($project) {
-                    $entry->project = $project;
-
-                    return $entry;
-                }),
-                'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
-            ]);
-
-        $products = collect([
-            (object) [
-                'product' => $project->product,
-                'brands' => collect([
-                    (object) [
-                        'project' => $project,
-                        'groups' => $groups,
-                        'pending' => $groups->sum('pending'),
-                    ],
-                ]),
-                'pending' => $groups->sum('pending'),
-            ],
-        ]);
+                'total' => $total,
+                'submitted' => $submitted,
+            ];
+        })->values();
 
         return view('admin.projects.show', [
             'project' => $project,
@@ -87,7 +79,12 @@ class ProjectController extends Controller
             'docsTotal' => $docsTotal,
             'videosDone' => $videosDone,
             'videosTotal' => $videosTotal,
-            'products' => $products,
+            'overallPct' => $overallPct,
+            'pendingCount' => $statusCounts->get('pending', 0),
+            'submittedCount' => $statusCounts->get('submitted', 0),
+            'approvedCount' => $statusCounts->get('approved', 0),
+            'rejectedCount' => $statusCounts->get('rejected', 0),
+            'groups' => $groups,
             'renewalStatus' => $this->renewalService->statusFor($project->renewal),
             'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
         ]);
@@ -102,5 +99,27 @@ class ProjectController extends Controller
         $this->projectService->advanceStage($project, $data['stage']);
 
         return back()->with('success', 'Project stage updated.');
+    }
+
+    public function updateStatus(Request $request, Project $project): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(array_keys(Project::STATUSES))],
+        ]);
+
+        $this->projectService->updateStatus($project, $data['status']);
+
+        return back()->with('success', 'Project status updated.');
+    }
+
+    public function destroy(Project $project): RedirectResponse
+    {
+        if ($project->status === 'active') {
+            return back()->with('error', 'This project is active — set it to On Hold or Inactive before deleting.');
+        }
+
+        $project->delete();
+
+        return redirect()->route('admin.projects.index')->with('success', 'Project deleted.');
     }
 }

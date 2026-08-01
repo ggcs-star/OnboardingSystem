@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProductRenewalSettingController;
 use App\Http\Controllers\Admin\ProductTrainingController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ProjectDocumentController;
+use App\Http\Controllers\Admin\ProjectDocumentGroupController;
 use App\Http\Controllers\Admin\ProjectSalesAssignmentController;
 use App\Http\Controllers\Admin\ProjectTrainingOverviewController;
 use App\Http\Controllers\Admin\SalesEmployeeController;
@@ -54,9 +55,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
     Route::patch('/projects/{project}/stage', [ProjectController::class, 'updateStage'])->name('projects.stage.update');
+    Route::patch('/projects/{project}/status', [ProjectController::class, 'updateStatus'])->name('projects.status.update');
 
+    Route::get('/projects/{project}/documents', [ProjectDocumentGroupController::class, 'index'])->name('projects.documents.index');
+    Route::get('/projects/{project}/documents/{group}', [ProjectDocumentGroupController::class, 'show'])->name('projects.documents.show');
     Route::patch('/projects/{project}/documents/{group}/{field}', [ProjectDocumentController::class, 'update'])->name('projects.documents.update');
+    Route::put('/projects/{project}/documents/{group}/{field}', [ProjectDocumentController::class, 'edit'])->name('projects.documents.edit');
+    Route::delete('/projects/{project}/documents/{group}/{field}', [ProjectDocumentController::class, 'clear'])->name('projects.documents.clear');
     Route::patch('/projects/{project}/customization-requests/{customizationRequest}', [CustomizationRequestController::class, 'update'])->name('projects.customization-requests.update');
     Route::patch('/projects/{project}/sales-employee', [ProjectSalesAssignmentController::class, 'update'])->name('projects.sales-employee.update');
 

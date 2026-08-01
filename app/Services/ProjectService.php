@@ -79,7 +79,18 @@ class ProjectService
 
     public function toggleBlocked(Project $project): Project
     {
+        if ($project->status === 'inactive') {
+            return $project;
+        }
+
         $project->update(['status' => $project->status === 'blocked' ? 'active' : 'blocked']);
+
+        return $project->fresh();
+    }
+
+    public function updateStatus(Project $project, string $status): Project
+    {
+        $project->update(['status' => $status]);
 
         return $project->fresh();
     }

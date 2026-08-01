@@ -29,8 +29,9 @@
         <select name="status" onchange="this.form.submit()"
             class="rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
             <option value="">All Statuses</option>
-            <option value="active" @selected(request('status') === 'active')>Active</option>
-            <option value="blocked" @selected(request('status') === 'blocked')>On Hold</option>
+            @foreach (\App\Models\Project::STATUSES as $key => $label)
+                <option value="{{ $key }}" @selected(request('status') === $key)>{{ $label }}</option>
+            @endforeach
         </select>
         @if ($filterClient)
             <input type="hidden" name="client" value="{{ $filterClient }}">
@@ -47,31 +48,120 @@
                     <th class="px-4 py-3">Brand</th>
                     <th class="px-4 py-3">Documents</th>
                     <th class="px-4 py-3">Stage</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-app-border">
                 @forelse ($projects as $project)
                     @php
                         [$docsDone, $docsTotal] = $project->documentsProgress();
+                        $statusBadge = project_status_badge($project->status);
+                        $statusIconColor = match ($project->status) {
+                            'blocked' => 'text-warning',
+                            'inactive' => 'text-danger',
+                            default => 'text-success',
+                        };
                     @endphp
-                    <tr class="cursor-pointer hover:bg-surface-alt" onclick="window.location = '{{ route('admin.projects.show', $project) }}'">
+                    <tr class="hover:bg-surface-alt">
                         <td class="px-4 py-3">
                             <span class="font-medium text-secondary-dark">{{ $project->client->company_name }}</span>
                         </td>
                         <td class="px-4 py-3 text-secondary">{{ $project->product->name }}</td>
-                        <td class="px-4 py-3 text-secondary-dark">{{ $project->brand_name ?? $project->project_name }}</td>
+                        <td class="px-4 py-3">
+                            <a href="{{ route('admin.projects.show', $project) }}" class="font-medium text-secondary-dark hover:text-primary">
+                                {{ $project->brand_name ?? $project->project_name }}
+                            </a>
+                        </td>
                         <td class="px-4 py-3">
                             <span class="{{ $docsDone === $docsTotal && $docsTotal > 0 ? 'text-success' : 'text-warning' }} font-medium">
                                 {{ $docsDone }}/{{ $docsTotal }}
                             </span>
                         </td>
                         <td class="px-4 py-3">
-                            <x-project-timeline :stage="$project->current_stage" :status="$project->status" />
+                            <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'change-stage-{{ $project->id }}')"
+                                class="rounded-md p-1 hover:bg-surface-alt" title="Change Stage">
+                                <x-project-timeline :stage="$project->current_stage" :status="$project->status" />
+                            </button>
+                        </td>
+                        <td class="px-4 py-3">
+                            <form method="POST" action="{{ route('admin.projects.status.update', $project) }}">
+                                @csrf
+                                @method('PATCH')
+                                <div class="relative inline-block">
+                                    <select name="status" onchange="this.form.submit()"
+                                        class="appearance-none rounded-full border-0 py-1.5 pl-3.5 pr-8 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 {{ $statusBadge['classes'] }}">
+                                        @foreach (\App\Models\Project::STATUSES as $key => $label)
+                                            <option value="{{ $key }}" @selected($project->status === $key)>&#9679; {{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-icon name="chevron-down" class="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 {{ $statusIconColor }}" />
+                                </div>
+                            </form>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <a href="{{ route('admin.projects.show', $project) }}" title="View Project"
+                                    class="inline-flex items-center justify-center rounded-md border border-primary/30 bg-primary-light p-1.5 text-primary hover:border-primary/60 hover:bg-primary/20">
+                                    <x-icon name="eye" class="w-3.5 h-3.5" />
+                                </a>
+                                <a href="{{ route('admin.projects.documents.index', $project) }}" title="Edit Documents"
+                                    class="inline-flex items-center justify-center rounded-md border border-primary/30 bg-primary-light p-1.5 text-primary hover:border-primary/60 hover:bg-primary/20">
+                                    <x-icon name="edit" class="w-3.5 h-3.5" />
+                                </a>
+                                <form method="POST" action="{{ route('admin.projects.destroy', $project) }}"
+                                    onsubmit="return confirm('Delete this project? This also removes its documents, renewal history, and tickets.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" title="Delete Project"
+                                        class="inline-flex items-center justify-center rounded-md border border-danger/30 bg-danger-light p-1.5 text-danger hover:border-danger/60 hover:bg-danger/20">
+                                        <x-icon name="trash" class="w-3.5 h-3.5" />
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
+
+                    <x-modal name="change-stage-{{ $project->id }}" focusable>
+                        <form method="POST" action="{{ route('admin.projects.stage.update', $project) }}" class="p-6"
+                            onsubmit="return confirm('Change the stage to \'' + document.getElementById('stage-select-{{ $project->id }}').selectedOptions[0].text + '\'? Every stage before it will be marked complete.')">
+                            @csrf
+                            @method('PATCH')
+
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-lg font-semibold text-secondary-dark">Change Pipeline Stage</h2>
+                                    <p class="text-xs text-secondary">{{ $project->brand_name ?? $project->project_name }}</p>
+                                </div>
+                                <button type="button" x-on:click="$dispatch('close')" class="text-secondary hover:text-secondary-dark">
+                                    <x-icon name="x" class="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div class="mt-6 overflow-x-auto pb-1">
+                                <x-project-timeline :stage="$project->current_stage" :status="$project->status" show-labels />
+                            </div>
+
+                            <div class="mt-6">
+                                <x-input-label value="Set Stage To" class="text-xs uppercase tracking-wide" />
+                                <select id="stage-select-{{ $project->id }}" name="stage"
+                                    class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                                    @foreach (\App\Models\Project::STAGES as $key => $label)
+                                        <option value="{{ $key }}" @selected($project->current_stage === $key)>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-1.5 text-xs text-secondary">Every stage before the one you pick will be marked complete.</p>
+                            </div>
+
+                            <div class="mt-6 flex justify-between">
+                                <x-secondary-button type="button" x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                <x-primary-button type="submit">Update Stage</x-primary-button>
+                            </div>
+                        </form>
+                    </x-modal>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-secondary">No projects yet.</td>
+                        <td colspan="7" class="px-4 py-8 text-center text-secondary">No projects yet.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -23,6 +23,12 @@ class Project extends Model
 
     public const DOCUMENT_STATUSES = ['pending', 'submitted', 'approved', 'rejected'];
 
+    public const STATUSES = [
+        'active' => 'Active',
+        'blocked' => 'On Hold',
+        'inactive' => 'Inactive',
+    ];
+
     protected $fillable = [
            
    

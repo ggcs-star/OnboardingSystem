@@ -35,13 +35,13 @@
                 <div class="flex min-w-0 items-center gap-2">
                     <div class="relative min-w-0 flex-1">
                         <x-icon name="calendar" class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-secondary" />
-                        <input type="date" name="onboarded_from" value="{{ request('onboarded_from') }}"
+                        <input type="date" name="onboarded_from" value="{{ request('onboarded_from') }}" onchange="this.form.submit()"
                             class="w-full min-w-0 rounded-lg border-app-border pl-8 text-sm shadow-sm focus:border-primary focus:ring-primary">
                     </div>
                     <span class="shrink-0 text-secondary">–</span>
                     <div class="relative min-w-0 flex-1">
                         <x-icon name="calendar" class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-secondary" />
-                        <input type="date" name="onboarded_to" value="{{ request('onboarded_to') }}"
+                        <input type="date" name="onboarded_to" value="{{ request('onboarded_to') }}" onchange="this.form.submit()"
                             class="w-full min-w-0 rounded-lg border-app-border pl-8 text-sm shadow-sm focus:border-primary focus:ring-primary">
                     </div>
                 </div>
@@ -49,7 +49,7 @@
 
             <div class="min-w-0 lg:col-span-2">
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Pending Docs</label>
-                <select name="docs"
+                <select name="docs" onchange="this.form.submit()"
                     class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
                     <option value="">All Documents</option>
                     <option value="complete" @selected(request('docs') === 'complete')>Fully Submitted</option>
@@ -59,7 +59,7 @@
 
             <div class="min-w-0 lg:col-span-2">
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Status</label>
-                <select name="status"
+                <select name="status" onchange="this.form.submit()"
                     class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
                     <option value="">All Statuses</option>
                     <option value="active" @selected(request('status') === 'active')>Active</option>
@@ -68,21 +68,17 @@
             </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-3">
-            <button type="submit"
-                class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">
-                <x-icon name="filter" class="w-4 h-4" />
-                Search
-            </button>
+        <button type="submit" class="hidden"></button>
 
-            @if (request()->anyFilled(['search', 'status', 'onboarded_from', 'onboarded_to', 'docs']))
+        @if (request()->anyFilled(['search', 'status', 'onboarded_from', 'onboarded_to', 'docs']))
+            <div class="mt-4 flex items-center gap-3">
                 <a href="{{ route('admin.clients.index') }}"
                     class="inline-flex items-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-light">
                     <x-icon name="refresh-cw" class="w-4 h-4" />
                     Reset Filters
                 </a>
-            @endif
-        </div>
+            </div>
+        @endif
     </form>
 
     <div class="mt-6 overflow-x-auto rounded-xl border border-app-border bg-white">
