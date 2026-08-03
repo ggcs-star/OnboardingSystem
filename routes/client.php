@@ -35,6 +35,7 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
 
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{project}/documents', [ProjectController::class, 'documents'])->name('projects.documents');
     Route::patch('/projects/{project}/hold', [ProjectController::class, 'toggleHold'])->name('projects.hold');
     Route::patch('/projects/{project}/contact', [ProjectController::class, 'updateContact'])->name('projects.contact.update');
 
@@ -49,10 +50,8 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::post('/projects/{project}/customization-requests', [CustomizationRequestController::class, 'store'])
         ->name('projects.customization-requests.store');
 
-    Route::post('/projects/{project}/policies', [ProjectPolicyController::class, 'store'])
-        ->name('projects.policies.store');
-    Route::delete('/projects/{project}/policies/{policy}', [ProjectPolicyController::class, 'destroy'])
-        ->name('projects.policies.destroy');
+    Route::get('/projects/{project}/policies', [ProjectPolicyController::class, 'index'])
+        ->name('projects.policies');
 
     Route::get('/support', [SupportTicketController::class, 'index'])->name('support.index');
     Route::post('/support', [SupportTicketController::class, 'store'])->name('support.store');

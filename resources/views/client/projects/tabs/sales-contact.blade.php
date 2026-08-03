@@ -59,55 +59,10 @@
                     </p>
                 </div>
             </div>
-
-            <form method="POST" action="{{ route('client.onboarding.subscription.sales-employee', $project) }}" class="mt-4">
-                @csrf
-                <input type="hidden" name="sales_employee_id" value="">
-                <button type="submit" class="text-xs text-secondary hover:text-danger hover:underline">Clear selection</button>
-            </form>
         </div>
     @else
         <div class="rounded-xl border border-dashed border-app-border bg-white p-8 text-center text-sm text-secondary">
             No salesperson has been attributed to {{ $brandLabel }} yet.
-        </div>
-    @endif
-
-    @if ($salesEmployees->isNotEmpty())
-        <div>
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-secondary">{{ $project->salesEmployee ? 'Change Salesperson' : 'Select a Salesperson' }}</h2>
-            <p class="mt-1 text-sm text-secondary">Let us know which salesperson you bought {{ $project->product->name }} ({{ $brandLabel }}) through.</p>
-
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($salesEmployees as $salesEmployee)
-                    @php $isSelected = $project->sales_employee_id === $salesEmployee->id; @endphp
-                    <div class="flex flex-col rounded-xl border bg-white p-5 {{ $isSelected ? 'border-primary ring-1 ring-primary' : 'border-app-border' }}">
-                        <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-light text-primary">
-                            <x-icon name="briefcase" class="w-5 h-5" />
-                        </span>
-
-                        <div class="mt-4 flex items-center gap-2">
-                            <h3 class="text-base font-semibold text-secondary-dark">{{ $salesEmployee->name }}</h3>
-                            @if ($isSelected)
-                                <x-badge classes="bg-primary-light text-primary">Selected</x-badge>
-                            @endif
-                        </div>
-                        <p class="mt-1 text-sm text-secondary">{{ $salesEmployee->phone }}</p>
-                        @if ($salesEmployee->email)
-                            <p class="text-sm text-secondary">{{ $salesEmployee->email }}</p>
-                        @endif
-
-                        <form method="POST" action="{{ route('client.onboarding.subscription.sales-employee', $project) }}" class="mt-5">
-                            @csrf
-                            <input type="hidden" name="sales_employee_id" value="{{ $salesEmployee->id }}">
-                            <button type="submit" @disabled($isSelected)
-                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium
-                                {{ $isSelected ? 'cursor-default bg-surface-alt text-secondary' : 'bg-primary text-white hover:bg-primary-dark' }}">
-                                {{ $isSelected ? 'Selected' : 'Select' }}
-                            </button>
-                        </form>
-                    </div>
-                @endforeach
-            </div>
         </div>
     @endif
 </div>
