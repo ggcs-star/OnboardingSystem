@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
-use App\Models\SalesEmployee;
 use App\Services\ProjectService;
 use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
@@ -23,56 +22,52 @@ class ProjectController extends Controller
     {
         $client = $request->user()->client;
 
-        $projects = $client
-            ? $client->projects()->with('product')->latest()->get()
+        $products = $client
+            ? $client->projects()->with('product')->get()->pluck('product')->unique('id')->sortBy('name')->values()
             : collect();
 
-        $groupedProjects = $projects
-            ->groupBy('product_id')
-            ->map(fn ($productProjects) => [
-                'product' => $productProjects->first()->product,
-                'projects' => $productProjects,
-            ])
-            ->values();
+        $projects = $client
+            ? $client->projects()->with(['product', 'salesEmployee'])
+                ->when($request->filled('search'), function ($query) use ($request) {
+                    $search = $request->string('search');
+                    $query->where(function ($q) use ($search) {
+                        $q->where('project_name', 'like', "%{$search}%")
+                            ->orWhere('brand_name', 'like', "%{$search}%");
+                    });
+                })
+                ->when($request->filled('product'), fn ($query) => $query->where('product_id', $request->integer('product')))
+                ->when($request->filled('stage'), fn ($query) => $query->where('current_stage', $request->string('stage')))
+                ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+                ->latest()
+                ->get()
+            : collect();
 
-        return view('client.projects.index', ['groupedProjects' => $groupedProjects]);
+        return view('client.projects.index', ['projects' => $projects, 'products' => $products]);
     }
 
     public function show(Request $request, Project $project): View
     {
         abort_unless($project->client->user_id === $request->user()->id, 403);
 
-        $tabs = [
-            'documents' => ['label' => 'Documents', 'icon' => 'file-text'],
-            'training' => ['label' => 'Training', 'icon' => 'video'],
-            'policies' => ['label' => 'Policies', 'icon' => 'shield'],
-            'renewal' => ['label' => 'Subscription', 'icon' => 'refresh-cw'],
-            'sales-contact' => ['label' => 'Contact', 'icon' => 'briefcase'],
-            'customization' => ['label' => 'Customization', 'icon' => 'settings'],
-        ];
-
-        $activeTab = $request->query('tab', 'documents');
-        if (! array_key_exists($activeTab, $tabs)) {
-            $activeTab = 'documents';
-        }
-
         $project->load([
             'product.policies',
             'policies',
-            'product.training',
-            'client.trainingProgress',
             'renewal.history',
-            'customizationRequests.reviewedBy',
             'salesEmployee',
         ]);
 
         return view('client.projects.show', [
             'project' => $project,
-            'tabs' => $tabs,
-            'activeTab' => $activeTab,
             'renewalStatus' => $this->renewalService->statusFor($project->renewal),
-            'salesEmployees' => SalesEmployee::where('status', 'active')->orderBy('name')->get(),
+            'readOnly' => $request->boolean('readonly'),
         ]);
+    }
+
+    public function documents(Request $request, Project $project): View
+    {
+        abort_unless($project->client->user_id === $request->user()->id, 403);
+
+        return view('client.projects.documents', ['project' => $project]);
     }
 
     public function toggleHold(Request $request, Project $project): RedirectResponse
