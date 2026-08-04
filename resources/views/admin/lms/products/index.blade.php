@@ -161,7 +161,12 @@
             <div class="mt-6 space-y-5">
                 <div>
                     <x-input-label for="name" value="Product Name *" class="uppercase text-xs tracking-wide" />
-                    <x-text-input id="name" name="name" class="mt-1.5" placeholder="e.g. LocalPulse" :value="old('name')" required autofocus />
+                    <select id="name" name="name" class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary" required autofocus>
+                        <option value="" disabled @selected(! old('name'))>Select a product…</option>
+                        @foreach ($products as $product)
+                            <option value="{{ $product->name }}" @selected(old('name') === $product->name)>{{ $product->name }}</option>
+                        @endforeach
+                    </select>
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
