@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Product;
 use App\Models\ProductPolicy;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 class ProductSeeder extends Seeder
 {
@@ -51,11 +50,6 @@ class ProductSeeder extends Seeder
             ['question' => 'How do I change the company logo?', 'answer' => 'Go to Settings > General Settings and upload a new logo. Recommended size is 200x60px in PNG format with transparent background.'],
             ['question' => 'How do I add a reporter account?', 'answer' => 'Go to Users > Reporters > Add Reporter, fill in their details and assign the categories they can publish to. They will receive login credentials via email.'],
             ['question' => 'What is the Google Map API key used for?', 'answer' => 'The Google Map API key is used to display location-based news on the map view of your portal. It is optional but recommended for a better user experience.'],
-        ]);
-
-        $this->seedCheatsheets($localPulse, [
-            ['title' => 'LocalPulse Quick Start Guide', 'description' => 'Everything you need to publish your first news article.'],
-            ['title' => 'Reporter Onboarding Checklist', 'description' => 'A step-by-step checklist for bringing a new reporter on board.'],
         ]);
 
         $restaurantPos = Product::create([
@@ -252,10 +246,6 @@ class ProductSeeder extends Seeder
             ['question' => 'What happens when stock runs low?', 'answer' => 'Rapid Retail sends a reorder alert once stock for an item falls below the threshold you set for it.'],
         ]);
 
-        $this->seedCheatsheets($rapidRetail, [
-            ['title' => 'Rapid Retail Setup Checklist', 'description' => 'Everything a new store needs before going live.'],
-        ]);
-
         // Clients & Projects are seeded separately in ProjectSeeder, using
         // ClientService/ProjectService so they get real logins, document
         // templates, training progress, timelines and renewals.
@@ -295,31 +285,6 @@ class ProductSeeder extends Seeder
             'duration_months' => 12,
             'amount' => 90000,
         ]);
-    }
-
-    /**
-     * Writes a placeholder text file per cheatsheet so the view/download
-     * links work out of the box in a demo — swap these for real PDFs/docs
-     * whenever you have them.
-     *
-     * @param array<int, array{title: string, description: string}> $sheets
-     */
-    private function seedCheatsheets(Product $product, array $sheets): void
-    {
-        foreach ($sheets as $sheet) {
-            $path = 'cheatsheets/' . str()->slug($sheet['title']) . '.txt';
-
-            Storage::disk('public')->put(
-                $path,
-                "{$sheet['title']}\n\n{$sheet['description']}\n\nThis is a placeholder demo document for {$product->name}. Replace it with the real PDF/Word file from the admin Cheatsheets screen."
-            );
-
-            $product->cheatsheets()->create([
-                'title' => $sheet['title'],
-                'description' => $sheet['description'],
-                'file' => $path,
-            ]);
-        }
     }
 
     private function seedDefaultPolicies(Product $product): void

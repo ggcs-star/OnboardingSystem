@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Client\CheatsheetController;
 use App\Http\Controllers\Client\CustomizationRequestController;
 use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\DocumentValueController;
+use App\Http\Controllers\Client\LmsController;
 use App\Http\Controllers\Client\OnboardingController;
 use App\Http\Controllers\Client\ProjectController;
 use App\Http\Controllers\Client\ProjectPolicyController;
@@ -27,8 +27,9 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
 
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
 
-    Route::get('/cheatsheets', [CheatsheetController::class, 'index'])->name('cheatsheets.index');
-    Route::get('/cheatsheets/{cheatsheet}/download', [CheatsheetController::class, 'download'])->name('cheatsheets.download');
+    Route::get('/lms', [LmsController::class, 'index'])->name('lms.index');
+    Route::get('/lms/{lmsProduct}', [LmsController::class, 'product'])->name('lms.product');
+    Route::get('/lms/{lmsProduct}/articles/{lmsArticle}', [LmsController::class, 'article'])->name('lms.article');
 
     Route::get('/customization-requests', [CustomizationRequestController::class, 'index'])->name('customization-requests.index');
     Route::post('/customization-requests', [CustomizationRequestController::class, 'storeAny'])->name('customization-requests.store');

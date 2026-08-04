@@ -57,6 +57,25 @@ public function projects(): HasMany
         return $this->hasMany(ClientProduct::class);
     }
 
+    public function lmsProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            LmsProduct::class,
+            'lms_client_products',
+            'client_id',
+            'lms_product_id'
+        )->withPivot([
+                    'status',
+                    'assigned_by',
+                    'assigned_at',
+                ])->withTimestamps();
+    }
+
+    public function lmsClientProducts(): HasMany
+    {
+        return $this->hasMany(LmsClientProduct::class);
+    }
+
     public function inquiries()
 {
     return $this->hasMany(ProductInquiry::class);
