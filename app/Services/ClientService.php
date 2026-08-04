@@ -33,7 +33,7 @@ class ClientService
                 'status' => 'active',
             ]);
 
-            foreach ($data['products'] as $productId) {
+            foreach ($data['products'] ?? [] as $productId) {
 
                 ClientProduct::create([
                     'client_id' => $client->id,

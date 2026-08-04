@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreLmsProductRequest;
 use App\Http\Requests\Admin\UpdateLmsProductRequest;
 use App\Models\LmsArticle;
 use App\Models\LmsProduct;
+use App\Models\Product;
 use App\Services\FileUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class LmsProductController extends Controller
 
         return view('admin.lms.products.index', [
             'lmsProducts' => $lmsProducts,
+            'products' => Product::orderBy('name')->get(),
         ]);
     }
 
