@@ -1,15 +1,18 @@
 <?php
 
-use App\Http\Controllers\Admin\CheatsheetOverviewController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\CustomizationRequestController;
 use App\Http\Controllers\Admin\CustomizationRequestOverviewController;
 use App\Http\Controllers\Admin\DocumentReviewController;
+use App\Http\Controllers\Admin\LmsArticleController;
+use App\Http\Controllers\Admin\LmsCategoryController;
+use App\Http\Controllers\Admin\LmsProductClientController;
+use App\Http\Controllers\Admin\LmsProductController;
+use App\Http\Controllers\Admin\LmsSubCategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductDocumentFieldController;
 use App\Http\Controllers\Admin\ProductDocumentGroupController;
 use App\Http\Controllers\Admin\ProductFaqController;
-use App\Http\Controllers\Admin\ProductCheatsheetController;
 use App\Http\Controllers\Admin\ProductPolicyController;
 use App\Http\Controllers\Admin\ProductRenewalSettingController;
 use App\Http\Controllers\Admin\ProductTrainingController;
@@ -80,18 +83,40 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/training-videos/{training}', [ProductTrainingController::class, 'destroy'])->name('training-videos.destroy');
     Route::post('/products/{product}/training-videos/reorder', [ProductTrainingController::class, 'reorder'])->name('training-videos.reorder');
 
-    Route::get('/cheatsheets', [CheatsheetOverviewController::class, 'index'])->name('cheatsheets.index');
-    Route::post('/cheatsheets', [ProductCheatsheetController::class, 'store'])->name('cheatsheets.store');
-    Route::get('/cheatsheets/{cheatsheet}/download', [ProductCheatsheetController::class, 'download'])->name('cheatsheets.download');
-    Route::delete('/cheatsheets/{cheatsheet}', [ProductCheatsheetController::class, 'destroy'])->name('cheatsheets.destroy');
-    Route::post('/products/{product}/cheatsheets/reorder', [ProductCheatsheetController::class, 'reorder'])->name('cheatsheets.reorder');
-
     Route::get('/customization-requests', [CustomizationRequestOverviewController::class, 'index'])->name('customization-requests.index');
 
     Route::get('/support', [SupportTicketController::class, 'index'])->name('support.index');
     Route::get('/support/{supportTicket}', [SupportTicketController::class, 'show'])->name('support.show');
     Route::post('/support/{supportTicket}/messages', [SupportTicketController::class, 'reply'])->name('support.messages.store');
     Route::patch('/support/{supportTicket}/status', [SupportTicketController::class, 'updateStatus'])->name('support.status.update');
+
+    Route::get('/lms/products', [LmsProductController::class, 'index'])->name('lms.products.index');
+    Route::post('/lms/products', [LmsProductController::class, 'store'])->name('lms.products.store');
+    Route::get('/lms/products/{lmsProduct}', [LmsProductController::class, 'show'])->name('lms.products.show');
+    Route::put('/lms/products/{lmsProduct}', [LmsProductController::class, 'update'])->name('lms.products.update');
+    Route::delete('/lms/products/{lmsProduct}', [LmsProductController::class, 'destroy'])->name('lms.products.destroy');
+
+    Route::get('/lms/products/{lmsProduct}/preview', [LmsProductController::class, 'preview'])->name('lms.products.preview');
+    Route::get('/lms/products/{lmsProduct}/preview/articles/{lmsArticle}', [LmsProductController::class, 'previewArticle'])->name('lms.products.preview.article');
+
+    Route::post('/lms/products/{lmsProduct}/categories', [LmsCategoryController::class, 'store'])->name('lms.categories.store');
+    Route::put('/lms/categories/{lmsCategory}', [LmsCategoryController::class, 'update'])->name('lms.categories.update');
+    Route::delete('/lms/categories/{lmsCategory}', [LmsCategoryController::class, 'destroy'])->name('lms.categories.destroy');
+
+    Route::post('/lms/categories/{lmsCategory}/sub-categories', [LmsSubCategoryController::class, 'store'])->name('lms.sub-categories.store');
+    Route::put('/lms/sub-categories/{lmsSubCategory}', [LmsSubCategoryController::class, 'update'])->name('lms.sub-categories.update');
+    Route::delete('/lms/sub-categories/{lmsSubCategory}', [LmsSubCategoryController::class, 'destroy'])->name('lms.sub-categories.destroy');
+
+    Route::get('/lms/products/{lmsProduct}/articles/create', [LmsArticleController::class, 'create'])->name('lms.articles.create');
+    Route::post('/lms/products/{lmsProduct}/articles', [LmsArticleController::class, 'store'])->name('lms.articles.store');
+    Route::get('/lms/articles/{lmsArticle}/edit', [LmsArticleController::class, 'edit'])->name('lms.articles.edit');
+    Route::put('/lms/articles/{lmsArticle}', [LmsArticleController::class, 'update'])->name('lms.articles.update');
+    Route::delete('/lms/articles/{lmsArticle}', [LmsArticleController::class, 'destroy'])->name('lms.articles.destroy');
+    Route::post('/lms/articles/upload-image', [LmsArticleController::class, 'uploadImage'])->name('lms.articles.upload-image');
+
+    Route::get('/lms/products/{lmsProduct}/clients', [LmsProductClientController::class, 'index'])->name('lms.products.clients.index');
+    Route::post('/lms/products/{lmsProduct}/clients/bulk-assign', [LmsProductClientController::class, 'bulkAssign'])->name('lms.products.clients.bulk-assign');
+    Route::patch('/lms/products/{lmsProduct}/clients/{client}', [LmsProductClientController::class, 'toggle'])->name('lms.products.clients.toggle');
 
     Route::get('/coming-soon/{label?}', function (?string $label = 'This section') {
         return view('admin.coming-soon', ['label' => $label]);

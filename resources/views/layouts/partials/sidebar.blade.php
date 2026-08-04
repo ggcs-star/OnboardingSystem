@@ -42,8 +42,8 @@
                 <x-sidebar-link :href="route('admin.training.index')" :active="request()->routeIs('admin.training.*')" icon="play-circle">
                     <span x-show="!collapsed" x-cloak>Training</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('admin.cheatsheets.index')" :active="request()->routeIs('admin.cheatsheets.*')" icon="file-text">
-                    <span x-show="!collapsed" x-cloak>Cheatsheets</span>
+                <x-sidebar-link :href="route('admin.lms.products.index')" :active="request()->routeIs('admin.lms.*')" icon="book-open">
+                    <span x-show="!collapsed" x-cloak>Documentation</span>
                 </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.product.inquiry.index')" :active="request()->routeIs('admin.product-inquiry.*')" icon="help-circle">
                     <span x-show="!collapsed" x-cloak>Product Inquiries</span>

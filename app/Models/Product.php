@@ -39,11 +39,6 @@ class Product extends Model
         return $this->hasMany(ProductTraining::class)->ordered();
     }
 
-    public function cheatsheets(): HasMany
-    {
-        return $this->hasMany(ProductCheatsheet::class)->ordered();
-    }
-
     public function faqs(): HasMany
     {
         return $this->hasMany(ProductFaq::class)->orderBy('id');
