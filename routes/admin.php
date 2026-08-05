@@ -1,6 +1,14 @@
 <?php
 
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\CourseLessonController;
+use App\Http\Controllers\Admin\CourseModuleController;
+use App\Http\Controllers\Admin\CourseModuleQuizController;
+use App\Http\Controllers\Admin\CoursePreviewController;
+use App\Http\Controllers\Admin\CourseQuizCheckpointController;
+use App\Http\Controllers\Admin\CourseQuizQuestionController;
+use App\Http\Controllers\Admin\CourseQuizReviewController;
 use App\Http\Controllers\Admin\CustomizationRequestController;
 use App\Http\Controllers\Admin\CustomizationRequestOverviewController;
 use App\Http\Controllers\Admin\DocumentReviewController;
@@ -117,6 +125,45 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/lms/products/{lmsProduct}/clients', [LmsProductClientController::class, 'index'])->name('lms.products.clients.index');
     Route::post('/lms/products/{lmsProduct}/clients/bulk-assign', [LmsProductClientController::class, 'bulkAssign'])->name('lms.products.clients.bulk-assign');
     Route::patch('/lms/products/{lmsProduct}/clients/{client}', [LmsProductClientController::class, 'toggle'])->name('lms.products.clients.toggle');
+
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
+    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
+    Route::patch('/courses/{course}/publish', [CourseController::class, 'togglePublish'])->name('courses.publish.toggle');
+    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
+
+    Route::get('/courses/{course}/preview', [CoursePreviewController::class, 'show'])->name('courses.preview');
+    Route::post('/course-lessons/{courseLesson}/preview-progress', [CoursePreviewController::class, 'progress'])->name('course-lessons.preview-progress');
+    Route::post('/course-quiz-checkpoints/{checkpoint}/preview-answers', [CoursePreviewController::class, 'quizAnswer'])->name('course-quiz-answers.preview-store');
+
+    Route::post('/courses/{course}/modules', [CourseModuleController::class, 'store'])->name('course-modules.store');
+    Route::put('/course-modules/{courseModule}', [CourseModuleController::class, 'update'])->name('course-modules.update');
+    Route::delete('/course-modules/{courseModule}', [CourseModuleController::class, 'destroy'])->name('course-modules.destroy');
+    Route::post('/courses/{course}/modules/reorder', [CourseModuleController::class, 'reorder'])->name('course-modules.reorder');
+
+    Route::get('/course-modules/{courseModule}/lessons/create', [CourseLessonController::class, 'create'])->name('course-lessons.create');
+    Route::post('/course-modules/{courseModule}/lessons', [CourseLessonController::class, 'store'])->name('course-lessons.store');
+    Route::get('/course-lessons/{courseLesson}/edit', [CourseLessonController::class, 'edit'])->name('course-lessons.edit');
+    Route::put('/course-lessons/{courseLesson}', [CourseLessonController::class, 'update'])->name('course-lessons.update');
+    Route::delete('/course-lessons/{courseLesson}', [CourseLessonController::class, 'destroy'])->name('course-lessons.destroy');
+    Route::post('/course-modules/{courseModule}/lessons/reorder', [CourseLessonController::class, 'reorder'])->name('course-lessons.reorder');
+
+    Route::post('/course-lessons/{courseLesson}/checkpoints', [CourseQuizCheckpointController::class, 'store'])->name('course-quiz-checkpoints.store');
+    Route::put('/course-quiz-checkpoints/{checkpoint}', [CourseQuizCheckpointController::class, 'update'])->name('course-quiz-checkpoints.update');
+    Route::delete('/course-quiz-checkpoints/{checkpoint}', [CourseQuizCheckpointController::class, 'destroy'])->name('course-quiz-checkpoints.destroy');
+
+    Route::post('/course-modules/{courseModule}/quizzes', [CourseModuleQuizController::class, 'store'])->name('course-module-quizzes.store');
+    Route::get('/course-module-quizzes/{checkpoint}/edit', [CourseModuleQuizController::class, 'edit'])->name('course-module-quizzes.edit');
+    Route::put('/course-module-quizzes/{checkpoint}', [CourseModuleQuizController::class, 'update'])->name('course-module-quizzes.update');
+    Route::delete('/course-module-quizzes/{checkpoint}', [CourseModuleQuizController::class, 'destroy'])->name('course-module-quizzes.destroy');
+
+    Route::post('/course-quiz-checkpoints/{checkpoint}/questions', [CourseQuizQuestionController::class, 'store'])->name('course-quiz-questions.store');
+    Route::put('/course-quiz-questions/{question}', [CourseQuizQuestionController::class, 'update'])->name('course-quiz-questions.update');
+    Route::delete('/course-quiz-questions/{question}', [CourseQuizQuestionController::class, 'destroy'])->name('course-quiz-questions.destroy');
+
+    Route::get('/course-quiz-answers/pending', [CourseQuizReviewController::class, 'index'])->name('course-quiz-answers.pending');
+    Route::patch('/course-quiz-answers/{answer}/grade', [CourseQuizReviewController::class, 'grade'])->name('course-quiz-answers.grade');
 
     Route::get('/coming-soon/{label?}', function (?string $label = 'This section') {
         return view('admin.coming-soon', ['label' => $label]);

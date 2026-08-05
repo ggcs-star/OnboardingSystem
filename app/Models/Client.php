@@ -48,6 +48,16 @@ class Client extends Model
         return $this->hasMany(ClientTrainingProgress::class);
     }
 
+    public function courseLessonProgress(): HasMany
+    {
+        return $this->hasMany(ClientCourseLessonProgress::class);
+    }
+
+    public function quizAnswers(): HasMany
+    {
+        return $this->hasMany(ClientQuizAnswer::class);
+    }
+
 public function projects(): HasMany
 {
     return $this->hasMany(Project::class);

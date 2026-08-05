@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/lms-editor.js',
+                'resources/js/course-player.js',
             ],
             refresh: true,
         }),
