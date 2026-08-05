@@ -41,9 +41,6 @@
                 <x-sidebar-link :href="route('client.projects.index')" :active="request()->routeIs('client.projects.*')" icon="folder">
                     <span x-show="!collapsed" x-cloak>Projects</span>
                 </x-sidebar-link>
-                <x-sidebar-link :href="route('client.training.index')" :active="request()->routeIs('client.training.*')" icon="play-circle">
-                    <span x-show="!collapsed" x-cloak>Training</span>
-                </x-sidebar-link>
                 <x-sidebar-link :href="route('client.lms.index')" :active="request()->routeIs('client.lms.*')" icon="book-open">
                     <span x-show="!collapsed" x-cloak>Documentation</span>
                 </x-sidebar-link>

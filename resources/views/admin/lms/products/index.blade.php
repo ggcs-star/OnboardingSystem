@@ -92,7 +92,7 @@
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->categories_count }}</td>
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->sub_categories_count }}</td>
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->articles_count }}</td>
-                        <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->clients_count }}</td>
+                        <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->purchasedClientsCount() }}</td>
                         <td class="px-4 py-3">
                             <x-badge :classes="status_badge_classes($lmsProduct->active)" dot>
                                 {{ $lmsProduct->active ? 'Active' : 'Inactive' }}
@@ -160,14 +160,15 @@
 
             <div class="mt-6 space-y-5">
                 <div>
-                    <x-input-label for="name" value="Product Name *" class="uppercase text-xs tracking-wide" />
-                    <select id="name" name="name" class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary" required autofocus>
-                        <option value="" disabled @selected(! old('name'))>Select a product…</option>
+                    <x-input-label for="product_id" value="Product *" class="uppercase text-xs tracking-wide" />
+                    <select id="product_id" name="product_id" class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary" required autofocus>
+                        <option value="" disabled @selected(! old('product_id'))>Select a product…</option>
                         @foreach ($products as $product)
-                            <option value="{{ $product->name }}" @selected(old('name') === $product->name)>{{ $product->name }}</option>
+                            <option value="{{ $product->id }}" @selected((int) old('product_id') === $product->id)>{{ $product->name }}</option>
                         @endforeach
                     </select>
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    <p class="mt-1 text-xs text-secondary">Clients who purchase this product will automatically get access to its documentation.</p>
+                    <x-input-error :messages="$errors->get('product_id')" class="mt-2" />
                 </div>
 
                 <div>

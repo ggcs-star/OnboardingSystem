@@ -14,7 +14,7 @@ class StoreLmsProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:lms_products,name'],
+            'product_id' => ['required', 'integer', 'exists:products,id', 'unique:lms_products,product_id'],
             'tagline' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
@@ -24,7 +24,7 @@ class StoreLmsProductRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Documentation for this product already exists.',
+            'product_id.unique' => 'Documentation for this product already exists.',
         ];
     }
 }
