@@ -44,6 +44,11 @@ class Product extends Model
         return $this->hasMany(Course::class)->ordered();
     }
 
+    public function lmsProduct(): HasOne
+    {
+        return $this->hasOne(LmsProduct::class);
+    }
+
     public function faqs(): HasMany
     {
         return $this->hasMany(ProductFaq::class)->orderBy('id');

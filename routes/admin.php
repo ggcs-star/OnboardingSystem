@@ -123,8 +123,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/lms/articles/upload-image', [LmsArticleController::class, 'uploadImage'])->name('lms.articles.upload-image');
 
     Route::get('/lms/products/{lmsProduct}/clients', [LmsProductClientController::class, 'index'])->name('lms.products.clients.index');
-    Route::post('/lms/products/{lmsProduct}/clients/bulk-assign', [LmsProductClientController::class, 'bulkAssign'])->name('lms.products.clients.bulk-assign');
-    Route::patch('/lms/products/{lmsProduct}/clients/{client}', [LmsProductClientController::class, 'toggle'])->name('lms.products.clients.toggle');
 
     Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
     Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');

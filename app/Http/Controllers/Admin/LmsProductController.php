@@ -22,7 +22,7 @@ class LmsProductController extends Controller
 
     public function index(Request $request): View
     {
-        $lmsProducts = LmsProduct::withCount(['categories', 'subCategories', 'articles', 'clients'])
+        $lmsProducts = LmsProduct::withCount(['categories', 'subCategories', 'articles'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -37,14 +37,17 @@ class LmsProductController extends Controller
 
         return view('admin.lms.products.index', [
             'lmsProducts' => $lmsProducts,
-            'products' => Product::orderBy('name')->get(),
+            'products' => Product::whereDoesntHave('lmsProduct')->orderBy('name')->get(),
         ]);
     }
 
     public function store(StoreLmsProductRequest $request): RedirectResponse
     {
+        $product = Product::findOrFail($request->integer('product_id'));
+
         $data = $request->safe()->except('image');
-        $data['slug'] = $this->uniqueSlug($request->string('name'));
+        $data['name'] = $product->name;
+        $data['slug'] = $this->uniqueSlug($product->name);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->fileUploadService->store($request->file('image'), 'lms-products');

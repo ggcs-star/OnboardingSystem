@@ -7,6 +7,10 @@
         <div>
             <x-input-label for="name" value="Product Name *" class="text-xs uppercase tracking-wide" />
             <x-text-input id="name" name="name" class="mt-1.5" :value="old('name', $lmsProduct->name)" required />
+            <p class="mt-1 text-xs text-secondary">
+                Linked to purchased product:
+                <span class="font-medium text-secondary-dark">{{ $lmsProduct->product->name ?? 'None — clients cannot access this yet' }}</span>
+            </p>
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 

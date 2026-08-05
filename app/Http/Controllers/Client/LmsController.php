@@ -76,8 +76,11 @@ class LmsController extends Controller
             return collect();
         }
 
-        return $client->lmsProducts()
+        $purchasedProductIds = $client->products()
             ->wherePivot('status', true)
+            ->pluck('products.id');
+
+        return LmsProduct::whereIn('product_id', $purchasedProductIds)
             ->where('active', true)
             ->orderBy('name')
             ->get();
