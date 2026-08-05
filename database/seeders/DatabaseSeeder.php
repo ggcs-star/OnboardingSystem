@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             SalesEmployeeSeeder::class,
             ProjectSeeder::class,
             LmsDemoSeeder::class,
+            CourseDemoSeeder::class,
         ]);
 
 

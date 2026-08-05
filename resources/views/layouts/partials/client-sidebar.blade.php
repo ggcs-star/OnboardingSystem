@@ -47,6 +47,9 @@
                 <x-sidebar-link :href="route('client.lms.index')" :active="request()->routeIs('client.lms.*')" icon="book-open">
                     <span x-show="!collapsed" x-cloak>Documentation</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('client.courses.index')" :active="request()->routeIs('client.courses.*') || request()->routeIs('client.course-*')" icon="video">
+                    <span x-show="!collapsed" x-cloak>Courses</span>
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('client.customization-requests.index')" :active="request()->routeIs('client.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>
                 </x-sidebar-link>

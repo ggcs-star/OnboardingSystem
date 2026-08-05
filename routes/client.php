@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Client\CourseController;
+use App\Http\Controllers\Client\CourseLessonProgressController;
+use App\Http\Controllers\Client\CourseQuizAnswerController;
 use App\Http\Controllers\Client\CustomizationRequestController;
 use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\DocumentValueController;
@@ -26,6 +29,11 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::post('/onboarding/{project}/subscription/sales-employee', [OnboardingController::class, 'selectSalesperson'])->name('onboarding.subscription.sales-employee');
 
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
+
+    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+    Route::post('/course-lessons/{courseLesson}/progress', [CourseLessonProgressController::class, 'update'])->name('course-lessons.progress.update');
+    Route::post('/course-quiz-checkpoints/{checkpoint}/answers', [CourseQuizAnswerController::class, 'store'])->name('course-quiz-answers.store');
 
     Route::get('/lms', [LmsController::class, 'index'])->name('lms.index');
     Route::get('/lms/{lmsProduct}', [LmsController::class, 'product'])->name('lms.product');
