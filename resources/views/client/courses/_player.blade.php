@@ -185,6 +185,21 @@
                             pointsAwarded: data.points_awarded ?? null,
                             correctOptionIds: data.correct_option_ids || [],
                         };
+
+                        // `question` here is the same object stored inside
+                        // this.items[...] (arrays/objects are referenced,
+                        // not copied) — mutating it is what makes the answer
+                        // stick when the user leaves this item and comes
+                        // back. Without this, resetAnswersForItem() would
+                        // rebuild `answers` from the original, still-
+                        // "unanswered" snapshot embedded at page load and
+                        // wipe out what was just submitted.
+                        question.answered = true;
+                        question.isCorrect = data.is_correct;
+                        question.pointsAwarded = data.points_awarded ?? null;
+                        question.yourSelectedIds = [...this.answers[question.id].selectedIds];
+                        question.yourText = this.answers[question.id].text;
+                        question.correctOptionIds = data.correct_option_ids || [];
                     })
                 );
 
