@@ -1,36 +1,39 @@
 @php
     $portalClient = Auth::user()->client;
     $portalName = $portalClient?->company_name ?? 'Client Portal';
+    $portalLogoUrl = $portalClient?->logoUrl();
 @endphp
 
 <aside
     x-data="{ collapsed: false }"
-    :class="collapsed ? 'w-20' : 'w-72'"
-    class="hidden lg:flex lg:flex-col shrink-0 border-r border-app-border bg-sidebar-bg transition-all duration-200"
+    :class="collapsed ? 'w-20' : 'w-64'"
+    class="hidden lg:flex lg:flex-col shrink-0 border-r border-app-border bg-sidebar-bg shadow-[1px_0_0_0_rgba(15,23,42,0.02)] transition-all duration-200"
 >
     <div class="flex items-center justify-between px-4 py-5">
-        <a href="{{ route('client.dashboard') }}" class="flex items-center gap-2 overflow-hidden" :class="collapsed && 'justify-center w-full'">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white font-bold">
-                {{ Str::substr($portalName, 0, 1) }}
-            </span>
-            <span x-show="!collapsed" x-cloak class="truncate text-lg font-semibold text-secondary-dark" title="{{ $portalName }}">
-                {{ $portalName }}
-            </span>
+        <a href="{{ route('client.dashboard') }}" class="flex min-w-0 items-center overflow-hidden rounded-lg bg-white p-1.5 shadow-sm" :class="collapsed && 'justify-center'">
+            @if ($portalLogoUrl)
+                <img x-show="!collapsed" x-cloak src="{{ $portalLogoUrl }}" alt="{{ $portalName }}" class="h-8 w-auto max-w-[165px] shrink-0 object-contain">
+                <img x-show="collapsed" x-cloak src="{{ $portalLogoUrl }}" alt="{{ $portalName }}" class="h-9 w-9 shrink-0 rounded object-cover">
+            @else
+                <span x-show="!collapsed" x-cloak class="flex h-8 max-w-[165px] items-center truncate px-1.5 text-sm font-semibold text-secondary-dark" title="{{ $portalName }}">{{ $portalName }}</span>
+                <span x-show="collapsed" x-cloak class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-sm font-semibold text-primary">
+                    {{ Str::substr($portalName, 0, 1) }}
+                </span>
+            @endif
         </a>
-        <button @click="collapsed = !collapsed" x-show="!collapsed" x-cloak class="rounded-md p-1 text-secondary hover:bg-surface-alt">
+        <button @click="collapsed = !collapsed" x-show="!collapsed" x-cloak class="rounded-md p-1 text-sidebar-text hover:bg-white">
             <x-icon name="chevron-left" class="w-4 h-4" />
         </button>
     </div>
 
     <div class="px-4 pb-2" :class="collapsed && 'px-0 flex justify-center'">
-        <button @click="collapsed = !collapsed" x-show="collapsed" x-cloak class="rounded-md p-1 text-secondary hover:bg-surface-alt">
+        <button @click="collapsed = !collapsed" x-show="collapsed" x-cloak class="rounded-md p-1 text-sidebar-text hover:bg-white">
             <x-icon name="chevron-right" class="w-4 h-4" />
         </button>
     </div>
 
     <nav class="flex-1 space-y-6 overflow-y-auto px-3 pb-6">
         <div>
-            <p x-show="!collapsed" x-cloak class="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-secondary">Main</p>
             <div class="space-y-1">
                 <x-sidebar-link :href="route('client.dashboard')" :active="request()->routeIs('client.dashboard')" icon="grid">
                     <span x-show="!collapsed" x-cloak>Dashboard</span>
@@ -59,7 +62,7 @@
 
     <div class="border-t border-app-border p-3">
         <div class="flex items-center gap-3 px-1 pb-3" :class="collapsed && 'justify-center'">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-dark text-sm font-semibold text-white">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
                 {{ Str::substr(Auth::user()->name, 0, 1) }}
             </span>
             <span x-show="!collapsed" x-cloak class="min-w-0 flex-1">
@@ -71,7 +74,7 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit"
-                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-secondary-dark hover:bg-danger-light hover:text-danger"
+                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-text hover:bg-danger-light hover:text-danger"
                 :class="collapsed && 'justify-center'"
                 title="Log out"
             >

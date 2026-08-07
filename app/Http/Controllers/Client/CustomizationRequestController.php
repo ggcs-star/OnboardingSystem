@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\StoreCustomizationRequestRequest;
+use App\Models\CustomizationRequest;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,28 @@ class CustomizationRequestController extends Controller
             ? $client->projects()->with(['product', 'customizationRequests'])->latest()->get()
             : collect();
 
-        return view('client.customization-requests.index', ['projects' => $projects]);
+        $requests = CustomizationRequest::with(['project.product', 'project.client'])
+            ->whereHas('project', fn ($query) => $query->where('client_id', $client?->id ?? 0))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('title', 'like', '%' . $request->string('search') . '%');
+            })
+            ->when($request->filled('product'), function ($query) use ($request) {
+                $query->whereHas('project', fn ($p) => $p->where('product_id', $request->product));
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $products = $client
+            ? $client->products()->wherePivot('status', true)->orderBy('name')->get()
+            : collect();
+
+        return view('client.customization-requests.index', [
+            'projects' => $projects,
+            'requests' => $requests,
+            'products' => $products,
+        ]);
     }
 
     public function store(StoreCustomizationRequestRequest $request, Project $project): RedirectResponse

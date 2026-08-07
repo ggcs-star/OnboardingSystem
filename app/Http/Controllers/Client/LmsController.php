@@ -80,7 +80,8 @@ class LmsController extends Controller
             ->wherePivot('status', true)
             ->pluck('products.id');
 
-        return LmsProduct::whereIn('product_id', $purchasedProductIds)
+        return LmsProduct::with('product')
+            ->whereIn('product_id', $purchasedProductIds)
             ->where('active', true)
             ->orderBy('name')
             ->get();

@@ -99,9 +99,24 @@
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $course->modules_count }}</td>
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $course->lessons_count }}</td>
                         <td class="px-4 py-3">
-                            <x-badge :classes="status_badge_classes($course->is_published)" dot>
-                                {{ $course->is_published ? 'Published' : 'Draft' }}
-                            </x-badge>
+                            @php
+                                $courseStatusColorClass = $course->is_published ? 'text-success' : 'text-secondary-dark';
+                                $courseStatusSelectClasses = $course->is_published ? 'bg-success-light text-success' : 'bg-secondary-light text-secondary-dark';
+                            @endphp
+                            <form method="POST" action="{{ route('admin.courses.publish.toggle', $course) }}">
+                                @csrf
+                                @method('PATCH')
+                                <div class="relative inline-block">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-current {{ $courseStatusColorClass }}"></span>
+                                    <select name="is_published" onchange="this.form.submit()"
+                                        class="appearance-none bg-none rounded-full border-0 py-1.5 pl-7 pr-7 text-xs font-medium focus:ring-2 focus:ring-primary {{ $courseStatusSelectClasses }}">
+                                        <option value="1" @selected($course->is_published)>Published</option>
+                                        <option value="0" @selected(! $course->is_published)>Draft</option>
+                                    </select>
+                                    <x-icon name="chevron-down"
+                                        class="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 {{ $courseStatusColorClass }}" />
+                                </div>
+                            </form>
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex flex-wrap items-center justify-end gap-1.5">
@@ -113,14 +128,6 @@
                                     class="inline-flex items-center justify-center rounded-md border border-chart-4/30 bg-chart-4/15 p-1.5 text-chart-4 hover:border-chart-4/60 hover:bg-chart-4/25">
                                     <x-icon name="eye" class="w-3.5 h-3.5" />
                                 </a>
-                                <form method="POST" action="{{ route('admin.courses.publish.toggle', $course) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" title="{{ $course->is_published ? 'Published — click to unpublish' : 'Draft — click to publish' }}"
-                                        class="inline-flex items-center justify-center rounded-md border p-1.5 {{ $course->is_published ? 'border-success/30 bg-success-light text-success hover:border-success/60 hover:bg-success/20' : 'border-app-border bg-surface-alt text-secondary hover:border-secondary/40 hover:bg-app-border' }}">
-                                        <x-icon name="{{ $course->is_published ? 'check' : 'clock' }}" class="w-3.5 h-3.5" />
-                                    </button>
-                                </form>
                                 <form method="POST" action="{{ route('admin.courses.destroy', $course) }}"
                                     onsubmit="return confirm('Delete this course and everything under it?');">
                                     @csrf

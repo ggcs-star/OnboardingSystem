@@ -17,8 +17,12 @@
 
     <div class="mt-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div class="flex items-start gap-4">
-            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
-                <x-icon name="box" class="w-6 h-6" />
+            <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary-light p-3">
+                @if ($product->imageUrl())
+                    <img src="{{ $product->imageUrl() }}" alt="{{ $product->name }}" class="h-full w-full object-contain">
+                @else
+                    <img src="{{ asset('assets/images/logo-mark.png') }}" alt="{{ config('app.name') }}" class="h-full w-full object-contain">
+                @endif
             </span>
             <div>
                 <div class="flex items-center gap-2">

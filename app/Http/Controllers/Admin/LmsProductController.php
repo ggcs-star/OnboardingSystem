@@ -22,7 +22,8 @@ class LmsProductController extends Controller
 
     public function index(Request $request): View
     {
-        $lmsProducts = LmsProduct::withCount(['categories', 'subCategories', 'articles'])
+        $lmsProducts = LmsProduct::with('product')
+            ->withCount(['categories', 'subCategories', 'articles'])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -124,6 +125,17 @@ class LmsProductController extends Controller
         $lmsProduct->delete();
 
         return redirect()->route('admin.lms.products.index')->with('success', 'LMS product deleted.');
+    }
+
+    public function updateStatus(Request $request, LmsProduct $lmsProduct): RedirectResponse
+    {
+        $data = $request->validate([
+            'active' => ['required', 'boolean'],
+        ]);
+
+        $lmsProduct->update($data);
+
+        return back()->with('success', 'LMS product status updated.');
     }
 
     private function uniqueSlug(string $name): string

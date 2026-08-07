@@ -12,61 +12,130 @@
         @endif
     </div>
 
-    <div class="mt-6 space-y-4">
-        @forelse ($projects as $project)
-            @php $pendingCount = $project->customizationRequests->where('status', 'pending')->count(); @endphp
-            <div class="rounded-xl border border-app-border bg-white" x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }">
-                <button type="button" @click="open = !open" class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
-                    <div class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
-                            <x-icon name="settings" class="w-4 h-4" />
-                        </span>
-                        <div>
-                            <h2 class="font-semibold text-secondary-dark">{{ $project->project_name }}</h2>
-                            <p class="text-xs text-secondary">{{ $project->product->name }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if ($pendingCount > 0)
-                            <x-badge classes="bg-warning-light text-warning">{{ $pendingCount }} pending</x-badge>
-                        @else
-                            <x-badge classes="bg-surface-alt text-secondary">{{ $project->customizationRequests->count() }} requests</x-badge>
-                        @endif
-                        <x-icon name="chevron-down" class="w-4 h-4 shrink-0 text-secondary transition" x-bind:class="open && '-rotate-180'" />
-                    </div>
-                </button>
-
-                <div x-show="open" x-cloak class="space-y-3 border-t border-app-border p-5">
-                    @forelse ($project->customizationRequests as $customizationRequest)
-                        @php $badge = customization_status_badge($customizationRequest->status); @endphp
-                        <div class="rounded-xl border border-app-border bg-white p-5">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <h4 class="font-medium text-secondary-dark">{{ $customizationRequest->title }}</h4>
-                                    <p class="mt-1 text-sm text-secondary">{{ $customizationRequest->description }}</p>
-                                    <p class="mt-2 text-xs text-secondary/70">Submitted {{ $customizationRequest->created_at->format('d-M-Y') }}</p>
-                                </div>
-                                <x-badge :classes="$badge['classes']" class="shrink-0">{{ $badge['label'] }}</x-badge>
-                            </div>
-
-                            @if ($customizationRequest->status !== 'pending' && $customizationRequest->admin_notes)
-                                <div class="mt-3 rounded-lg px-3 py-2 text-sm {{ $customizationRequest->status === 'rejected' ? 'bg-danger-light text-danger' : ($customizationRequest->status === 'partial' ? 'bg-primary-light text-primary' : 'bg-success-light text-success') }}">
-                                    <span class="font-medium">Response from our team:</span> {{ $customizationRequest->admin_notes }}
-                                </div>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="rounded-xl border border-dashed border-app-border bg-white p-6 text-center text-sm text-secondary">
-                            No customization requests for this project yet.
-                        </div>
-                    @endforelse
+    <form method="GET" action="{{ route('client.customization-requests.index') }}" class="mt-6 rounded-xl border border-app-border bg-white p-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+            <div class="min-w-0 lg:col-span-5">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Search Request</label>
+                <div class="relative">
+                    <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search by request title..."
+                        class="w-full rounded-lg border-app-border pl-10 text-sm shadow-sm focus:border-primary focus:ring-primary">
                 </div>
             </div>
-        @empty
-            <div class="rounded-xl border border-dashed border-app-border bg-white p-10 text-center text-sm text-secondary">
-                You don't have any projects assigned yet.
+
+            <div class="min-w-0 lg:col-span-3">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Product</label>
+                <select name="product" onchange="this.form.submit()"
+                    class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                    <option value="">All Products</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}" @selected(request('product') == $product->id)>{{ $product->name }}</option>
+                    @endforeach
+                </select>
             </div>
-        @endforelse
+
+            <div class="min-w-0 lg:col-span-2">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Status</label>
+                <select name="status" onchange="this.form.submit()"
+                    class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                    <option value="">All Statuses</option>
+                    @foreach (\App\Models\CustomizationRequest::STATUSES as $value)
+                        <option value="{{ $value }}" @selected(request('status') === $value)>{{ ucfirst($value) }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex min-w-0 items-end lg:col-span-2">
+                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark">
+                    <x-icon name="search" class="w-4 h-4" />
+                    Search
+                </button>
+            </div>
+        </div>
+
+        @if (request()->anyFilled(['search', 'product', 'status']))
+            <div class="mt-4 flex items-center gap-3">
+                <a href="{{ route('client.customization-requests.index') }}"
+                    class="inline-flex items-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-light">
+                    <x-icon name="refresh-cw" class="w-4 h-4" />
+                    Reset Filters
+                </a>
+            </div>
+        @endif
+    </form>
+
+    <div class="mt-6 overflow-hidden rounded-xl border border-app-border bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="border-b border-app-border bg-surface-alt text-xs font-medium uppercase tracking-wide text-secondary">
+                    <tr>
+                        <th scope="col" class="px-6 py-4">Request</th>
+                        <th scope="col" class="px-6 py-4">Brand / Project</th>
+                        <th scope="col" class="px-6 py-4">Product</th>
+                        <th scope="col" class="px-6 py-4">Status</th>
+                        <th scope="col" class="px-6 py-4">Submitted</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-app-border bg-white">
+                    @forelse ($requests as $customizationRequest)
+                        @php $badge = customization_status_badge($customizationRequest->status); @endphp
+                        <tr class="align-top transition-colors hover:bg-surface-alt/60">
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-secondary-dark">{{ $customizationRequest->title }}</p>
+                                <p class="mt-1 max-w-xs truncate text-xs text-secondary" title="{{ $customizationRequest->description }}">
+                                    {{ $customizationRequest->description }}
+                                </p>
+                                @if ($customizationRequest->status !== 'pending' && $customizationRequest->admin_notes)
+                                    <div class="mt-2 max-w-xs rounded-lg px-3 py-2 text-xs {{ $customizationRequest->status === 'rejected' ? 'bg-danger-light text-danger' : ($customizationRequest->status === 'partial' ? 'bg-primary-light text-primary' : 'bg-success-light text-success') }}">
+                                        <span class="font-medium">Response:</span> {{ $customizationRequest->admin_notes }}
+                                    </div>
+                                @endif
+                            </td>
+
+                            <td class="px-6 py-4 text-secondary-dark">
+                                {{ $customizationRequest->project->brand_name ?? $customizationRequest->project->project_name }}
+                            </td>
+
+                            <td class="px-6 py-4 font-medium text-secondary-dark">
+                                {{ optional($customizationRequest->project->product)->name ?? 'N/A' }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <x-badge :classes="$badge['classes']" dot>{{ $badge['label'] }}</x-badge>
+                            </td>
+
+                            <td class="whitespace-nowrap px-6 py-4 text-secondary">
+                                {{ $customizationRequest->created_at->format('d M Y') }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-sm text-secondary">
+                                <div class="flex flex-col items-center justify-center">
+                                    <x-icon name="settings" class="mb-3 h-12 w-12 text-gray-300" />
+                                    @if ($projects->isEmpty())
+                                        <p class="text-base font-medium text-secondary-dark">You don't have any projects assigned yet</p>
+                                    @elseif (request()->anyFilled(['search', 'product', 'status']))
+                                        <p class="text-base font-medium text-secondary-dark">No customization requests match these filters</p>
+                                    @else
+                                        <p class="text-base font-medium text-secondary-dark">You haven't submitted any customization requests yet</p>
+                                        <p class="mt-1">Click "Add Request Customization" to get started.</p>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($requests->hasPages())
+            <div class="border-t border-app-border bg-surface-alt px-6 py-4">
+                {{ $requests->links() }}
+            </div>
+        @endif
     </div>
 
     @if ($projects->isNotEmpty())

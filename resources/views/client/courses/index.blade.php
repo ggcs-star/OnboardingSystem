@@ -10,6 +10,7 @@
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Product</label>
                 <select name="product_id" onchange="this.form.submit()"
                     class="w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                    <option value="" @selected(is_null($selectedProductId))>All Products</option>
                     @foreach ($assignedProducts as $product)
                         <option value="{{ $product->id }}" @selected($selectedProductId == $product->id)>{{ $product->name }}</option>
                     @endforeach
@@ -30,6 +31,9 @@
                     </div>
                 @endif
                 <div class="p-5">
+                    @if ($course->product)
+                        <x-badge classes="bg-primary-light text-primary mb-2">{{ $course->product->name }}</x-badge>
+                    @endif
                     <h2 class="truncate font-semibold text-secondary-dark">{{ $course->title }}</h2>
                     <p class="text-xs text-secondary">{{ $course->lessons_count }} {{ Str::plural('lesson', $course->lessons_count) }}</p>
                     @if ($course->description)
@@ -49,8 +53,10 @@
             <div class="col-span-full rounded-xl border border-dashed border-app-border bg-white p-10 text-center text-sm text-secondary">
                 @if ($assignedProducts->isEmpty())
                     You don't have any products assigned yet.
-                @else
+                @elseif ($selectedProductId)
                     No courses published for this product yet.
+                @else
+                    No courses published yet.
                 @endif
             </div>
         @endforelse

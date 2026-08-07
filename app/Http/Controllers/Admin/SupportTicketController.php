@@ -17,31 +17,45 @@ class SupportTicketController extends Controller
     {
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $products = Product::with(['projects.client', 'projects.tickets.messages'])
-            ->orderBy('name')
-            ->get();
+        $tickets = SupportTicket::with(['project.client', 'project.product', 'messages'])
+            ->when($request->filled('product'), function ($query) use ($request) {
+                $query->whereHas('project', fn ($p) => $p->where('product_id', $request->product));
+            })
+            ->when($request->filled('category'), function ($query) use ($request) {
+                $query->where('category', $request->category);
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('ticket_no', 'like', "%{$search}%")
+                        ->orWhereHas('project.client', fn ($c) => $c->where('company_name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->filled('date_range'), function ($query) use ($request) {
+                [$from, $to] = match ($request->date_range) {
+                    'last_7_days' => [now()->subDays(7)->startOfDay(), now()->endOfDay()],
+                    'last_30_days' => [now()->subDays(30)->startOfDay(), now()->endOfDay()],
+                    'this_month' => [now()->startOfMonth(), now()->endOfMonth()],
+                    'last_month' => [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()->endOfMonth()],
+                    default => [null, null],
+                };
 
-        $products->each(function (Product $product) {
-            $rows = $product->projects
-                ->filter(fn ($project) => $project->tickets->isNotEmpty())
-                ->flatMap(function ($project) {
-                    return $project->tickets->map(fn ($ticket) => (object) [
-                        'ticket' => $ticket,
-                        'project' => $project,
-                        'client' => $project->client,
-                    ]);
-                })
-                ->sortByDesc(fn ($row) => $row->ticket->created_at)
-                ->values();
+                if ($from && $to) {
+                    $query->whereBetween('created_at', [$from, $to]);
+                }
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-            $product->setRelation('ticketRows', $rows);
-        });
+        $products = Product::orderBy('name')->get();
 
-        $products = $products->filter(fn (Product $product) => $product->ticketRows->isNotEmpty())->values();
-
-        return view('admin.support.index', ['products' => $products]);
+        return view('admin.support.index', ['tickets' => $tickets, 'products' => $products]);
     }
 
     public function show(SupportTicket $supportTicket): View

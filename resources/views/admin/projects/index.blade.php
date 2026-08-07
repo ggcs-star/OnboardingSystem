@@ -89,10 +89,11 @@
                                 @csrf
                                 @method('PATCH')
                                 <div class="relative inline-block">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-current {{ $statusIconColor }}"></span>
                                     <select name="status" onchange="this.form.submit()"
-                                        class="appearance-none rounded-full border-0 py-1.5 pl-3.5 pr-8 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 {{ $statusBadge['classes'] }}">
+                                        class="appearance-none bg-none rounded-full border-0 py-1.5 pl-7 pr-7 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 {{ $statusBadge['classes'] }}">
                                         @foreach (\App\Models\Project::STATUSES as $key => $label)
-                                            <option value="{{ $key }}" @selected($project->status === $key)>&#9679; {{ $label }}</option>
+                                            <option value="{{ $key }}" @selected($project->status === $key)>{{ $label }}</option>
                                         @endforeach
                                     </select>
                                     <x-icon name="chevron-down" class="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 {{ $statusIconColor }}" />

@@ -17,7 +17,7 @@
         <div>
             <div class="flex flex-wrap items-center gap-3">
                 <h1 class="text-xl font-semibold text-secondary-dark">{{ $ticket->ticket_no }}</h1>
-                <x-badge :classes="$categoryBadge['classes']">{{ $categoryBadge['label'] }}</x-badge>
+                <x-badge :classes="$categoryBadge['classes']" dot>{{ $categoryBadge['label'] }}</x-badge>
                 <x-badge :classes="$statusBadge['classes']" dot>{{ $statusBadge['label'] }}</x-badge>
             </div>
             <p class="mt-1 text-sm text-secondary">
