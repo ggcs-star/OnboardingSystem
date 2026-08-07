@@ -26,12 +26,8 @@
                 <div class="flex h-full flex-col rounded-2xl border border-app-border bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30">
                     
                     <!-- Icon/Image -->
-                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
-                        @if ($product->imageUrl())
-                            <img src="{{ $product->imageUrl() }}" alt="{{ $product->name }}" class="h-full w-full rounded-xl object-cover">
-                        @else
-                            <x-icon name="box" class="h-6 w-6" />
-                        @endif
+                    <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-light p-2">
+                        <img src="{{ $product->imageUrl() ?: asset('favicon.png') }}" alt="{{ $product->name }}" class="h-full w-full object-contain">
                     </span>
 
                     <!-- Title & Badge -->
@@ -109,12 +105,8 @@
                         <div class="flex h-full flex-col rounded-2xl border border-app-border bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-gray-300">
                             
                             <!-- Icon/Image (Same as Onboarding) -->
-                            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
-                                @if ($product->imageUrl())
-                                    <img src="{{ $product->imageUrl() }}" alt="{{ $product->name }}" class="h-full w-full rounded-xl object-cover">
-                                @else
-                                    <x-icon name="box" class="h-6 w-6" />
-                                @endif
+                            <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100 p-2">
+                                <img src="{{ $product->imageUrl() ?: asset('favicon.png') }}" alt="{{ $product->name }}" class="h-full w-full object-contain">
                             </span>
 
                             <!-- Title (Same as Onboarding, without badge) -->
@@ -135,12 +127,12 @@
 
                             <!-- Button Section -->
                             <div class="mt-auto border-t border-app-border pt-5">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     x-on:click="selectedProduct = {{ $product->id }}; open = true;"
-                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                                 >
-                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                     </svg>
                                     Show Interest

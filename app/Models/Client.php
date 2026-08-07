@@ -29,6 +29,11 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function logoUrl(): ?string
+    {
+        return $this->logo ? asset('storage/' . $this->logo) : null;
+    }
+
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(

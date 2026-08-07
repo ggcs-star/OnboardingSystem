@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/sales-employees', [SalesEmployeeController::class, 'store'])->name('sales-employees.store');
     Route::get('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'show'])->name('sales-employees.show');
     Route::put('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'update'])->name('sales-employees.update');
+    Route::patch('/sales-employees/{salesEmployee}/status', [SalesEmployeeController::class, 'updateStatus'])->name('sales-employees.status.update');
     Route::delete('/sales-employees/{salesEmployee}', [SalesEmployeeController::class, 'destroy'])->name('sales-employees.destroy');
 
     Route::get('/documents', [DocumentReviewController::class, 'index'])->name('documents.index');
@@ -102,6 +103,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/lms/products', [LmsProductController::class, 'store'])->name('lms.products.store');
     Route::get('/lms/products/{lmsProduct}', [LmsProductController::class, 'show'])->name('lms.products.show');
     Route::put('/lms/products/{lmsProduct}', [LmsProductController::class, 'update'])->name('lms.products.update');
+    Route::patch('/lms/products/{lmsProduct}/status', [LmsProductController::class, 'updateStatus'])->name('lms.products.status.update');
     Route::delete('/lms/products/{lmsProduct}', [LmsProductController::class, 'destroy'])->name('lms.products.destroy');
 
     Route::get('/lms/products/{lmsProduct}/preview', [LmsProductController::class, 'preview'])->name('lms.products.preview');

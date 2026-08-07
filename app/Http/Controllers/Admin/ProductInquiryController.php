@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Models\ProductInquiry;
 class ProductInquiryController extends Controller
 {
@@ -27,11 +28,17 @@ class ProductInquiryController extends Controller
             });
         }
 
+        if ($request->filled('product')) {
+            $query->where('product_id', $request->product);
+        }
+
         $inquiries = $query->paginate(10);
+
+        $products = Product::orderBy('name')->get();
 
         return view(
             'admin.product-inquiries.index',
-            compact('inquiries')
+            compact('inquiries', 'products')
         );
     }
 }

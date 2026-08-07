@@ -72,14 +72,13 @@
             <tbody class="divide-y divide-app-border">
                 @forelse ($lmsProducts as $lmsProduct)
                     @php
-                        $iconPalette = ['bg-chart-1/15 text-chart-1', 'bg-chart-2/15 text-chart-2', 'bg-chart-3/15 text-chart-3', 'bg-chart-4/15 text-chart-4', 'bg-chart-5/15 text-chart-5'];
-                        $iconClasses = $iconPalette[$lmsProduct->id % count($iconPalette)];
+                        $productLogoUrl = optional($lmsProduct->product)->imageUrl();
                     @endphp
                     <tr>
                         <td class="px-4 py-3">
                             <a href="{{ route('admin.lms.products.show', $lmsProduct) }}" class="flex items-center gap-3 hover:text-primary">
-                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg {{ $iconClasses }}">
-                                    <x-icon name="book-open" class="w-5 h-5" />
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-light p-1.5">
+                                    <img src="{{ $productLogoUrl ?: asset('favicon.png') }}" alt="{{ $lmsProduct->name }}" class="h-full w-full object-contain">
                                 </span>
                                 <span>
                                     <span class="block font-medium text-secondary-dark">{{ $lmsProduct->name }}</span>
@@ -94,9 +93,24 @@
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->articles_count }}</td>
                         <td class="px-4 py-3 font-medium text-secondary-dark">{{ $lmsProduct->purchasedClientsCount() }}</td>
                         <td class="px-4 py-3">
-                            <x-badge :classes="status_badge_classes($lmsProduct->active)" dot>
-                                {{ $lmsProduct->active ? 'Active' : 'Inactive' }}
-                            </x-badge>
+                            @php
+                                $lmsStatusColorClass = $lmsProduct->active ? 'text-success' : 'text-danger';
+                                $lmsStatusSelectClasses = $lmsProduct->active ? 'bg-success-light text-success' : 'bg-danger-light text-danger';
+                            @endphp
+                            <form method="POST" action="{{ route('admin.lms.products.status.update', $lmsProduct) }}">
+                                @csrf
+                                @method('PATCH')
+                                <div class="relative inline-block">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-current {{ $lmsStatusColorClass }}"></span>
+                                    <select name="active" onchange="this.form.submit()"
+                                        class="appearance-none bg-none rounded-full border-0 py-1.5 pl-7 pr-7 text-xs font-medium focus:ring-2 focus:ring-primary {{ $lmsStatusSelectClasses }}">
+                                        <option value="1" @selected($lmsProduct->active)>Active</option>
+                                        <option value="0" @selected(! $lmsProduct->active)>Inactive</option>
+                                    </select>
+                                    <x-icon name="chevron-down"
+                                        class="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 {{ $lmsStatusColorClass }}" />
+                                </div>
+                            </form>
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex flex-wrap items-center justify-end gap-1.5">

@@ -20,10 +20,11 @@ class CourseController extends Controller
         $client = $request->user()->client;
         $assignedProducts = $this->assignedProducts($client);
 
-        $selectedProductId = $request->integer('product_id') ?: $assignedProducts->first()?->id;
+        $selectedProductId = $request->filled('product_id') ? $request->integer('product_id') : null;
 
-        $courses = $selectedProductId
-            ? Course::where('product_id', $selectedProductId)
+        $courses = $assignedProducts->isNotEmpty()
+            ? Course::with('product')
+                ->whereIn('product_id', $selectedProductId ? [$selectedProductId] : $assignedProducts->pluck('id'))
                 ->where('is_published', true)
                 ->withCount('lessons')
                 ->ordered()

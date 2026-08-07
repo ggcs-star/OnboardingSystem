@@ -142,10 +142,11 @@
                                     $statusSelectClasses = $client->status === 'active' ? 'bg-success-light text-success' : 'bg-danger-light text-danger';
                                 @endphp
                                 <div class="relative inline-block">
+                                    <span class="pointer-events-none absolute left-3 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-current {{ $statusColorClass }}"></span>
                                     <select name="status" onchange="this.form.submit()"
-                                        class="appearance-none bg-none rounded-lg border-0 py-1.5 pl-3 pr-7 text-xs font-medium focus:ring-2 focus:ring-primary {{ $statusSelectClasses }}">
-                                        <option value="active" @selected($client->status === 'active')>● Active</option>
-                                        <option value="blocked" @selected($client->status !== 'active')>● Inactive</option>
+                                        class="appearance-none bg-none rounded-full border-0 py-1.5 pl-7 pr-7 text-xs font-medium focus:ring-2 focus:ring-primary {{ $statusSelectClasses }}">
+                                        <option value="active" @selected($client->status === 'active')>Active</option>
+                                        <option value="blocked" @selected($client->status !== 'active')>Inactive</option>
                                     </select>
                                     <x-icon name="chevron-down"
                                         class="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 {{ $statusColorClass }}" />
@@ -288,7 +289,7 @@
                             </div>
 
                             <x-modal name="edit-client-{{ $client->id }}" focusable>
-                                <form method="POST" action="{{ route('admin.clients.update', $client) }}" class="p-6 text-left">
+                                <form method="POST" action="{{ route('admin.clients.update', $client) }}" class="p-6 text-left" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
 
@@ -327,6 +328,18 @@
                                         <div>
                                             <x-input-label for="edit_owner_name_{{ $client->id }}" value="Company Name" class="text-xs uppercase tracking-wide" />
                                             <x-text-input id="edit_owner_name_{{ $client->id }}" name="owner_name" class="mt-1.5" :value="$client->owner_name" />
+                                        </div>
+
+                                        <div class="sm:col-span-2">
+                                            <x-input-label for="edit_logo_{{ $client->id }}" value="Company Logo" class="text-xs uppercase tracking-wide" />
+                                            <div class="mt-1.5 flex items-center gap-3">
+                                                @if ($client->logoUrl())
+                                                    <img src="{{ $client->logoUrl() }}" alt="{{ $client->company_name }}" class="h-12 w-12 shrink-0 rounded-lg border border-app-border object-contain p-1">
+                                                @endif
+                                                <input id="edit_logo_{{ $client->id }}" name="logo" type="file" accept="image/*"
+                                                    class="w-full rounded-lg border-app-border text-sm shadow-sm file:mr-3 file:rounded-md file:border-0 file:bg-surface-alt file:px-3 file:py-1.5 file:text-sm focus:border-primary focus:ring-primary" />
+                                            </div>
+                                            <p class="mt-1 text-xs text-secondary">Shown in the client's portal sidebar after login. Leave blank to keep the current logo.</p>
                                         </div>
 
                                         <div>
@@ -377,7 +390,7 @@
     </div>
 
     <x-modal name="add-client" :show="$errors->any()" focusable>
-        <form method="POST" action="{{ route('admin.clients.store') }}" class="p-6">
+        <form method="POST" action="{{ route('admin.clients.store') }}" class="p-6" enctype="multipart/form-data">
             @csrf
 
             <div class="flex items-center justify-between">
@@ -426,6 +439,14 @@
                     <x-input-label for="phone" value="Contact Number" class="text-xs uppercase tracking-wide" />
                     <x-text-input id="phone" name="phone" class="mt-1.5" :value="old('phone')" />
                     <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                </div>
+
+                <div class="sm:col-span-2">
+                    <x-input-label for="logo" value="Company Logo" class="text-xs uppercase tracking-wide" />
+                    <input id="logo" name="logo" type="file" accept="image/*"
+                        class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm file:mr-3 file:rounded-md file:border-0 file:bg-surface-alt file:px-3 file:py-1.5 file:text-sm focus:border-primary focus:ring-primary" />
+                    <p class="mt-1 text-xs text-secondary">Shown in the client's portal sidebar after login. If skipped, the company name is shown instead.</p>
+                    <x-input-error :messages="$errors->get('logo')" class="mt-2" />
                 </div>
 
                 <div>

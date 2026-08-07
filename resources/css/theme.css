@@ -5,14 +5,17 @@
  * Values are "R G B" triples so Tailwind can apply opacity modifiers.
  */
 :root {
-    /* Brand / primary (buttons, active nav, links, focus rings) */
-    --color-primary: 37 99 235;       /* blue-600 */
-    --color-primary-dark: 29 78 216;  /* blue-700 */
-    --color-primary-light: 219 234 254; /* blue-100 */
+    /* Brand / primary (buttons, active nav, links, focus rings) —
+     * matches the GG Consultancy Services logo + ggconsultancy.services
+     * (#692BB2 primary / #A44CEE secondary / #FF847F accent in their site CSS). */
+    --color-primary: 105 43 178;      /* #692BB2 — brand violet */
+    --color-primary-dark: 80 30 156;  /* #501E9C — deeper violet for hover/active, from brand gradient */
+    --color-primary-light: 240 234 247; /* #F0EAF7 — soft lavender tint for badges/light backgrounds */
+    --color-primary-soft: 248 244 251;  /* #F8F4FB — subtle wash for topbar/hover backgrounds */
 
     /* Secondary (neutral surfaces, secondary buttons, borders) */
     --color-secondary: 100 116 139;   /* slate-500 */
-    --color-secondary-dark: 51 65 85; /* slate-700 */
+    --color-secondary-dark: 30 41 59; /* slate-800 — crisper heading/body text */
     --color-secondary-light: 241 245 249; /* slate-100 */
 
     /* Status colors */
@@ -28,11 +31,12 @@
     --color-surface-alt: 248 250 252;  /* slate-50 */
     --color-border: 226 232 240;       /* slate-200 */
 
-    /* Sidebar */
-    --color-sidebar-bg: 255 255 255;
-    --color-sidebar-active-bg: 239 246 255;  /* blue-50 */
-    --color-sidebar-active-text: 37 99 235;  /* blue-600 */
-    --color-sidebar-text: 71 85 105;         /* slate-600 */
+    /* Sidebar — light lavender wash, muted violet nav text, selected item is a
+     * deeper lavender pill with full-strength violet text. */
+    --color-sidebar-bg: 248 244 251;         /* #F8F4FB — light lavender wash */
+    --color-sidebar-active-bg: 231 219 245;  /* #E7DBF5 — deeper lavender so active item stands out */
+    --color-sidebar-active-text: 105 43 178; /* brand violet */
+    --color-sidebar-text: 105 43 178;        /* #692BB2 — brand violet, matches active state */
 
     /* Chart categorical palette — fixed order, validated for CVD-safe
      * adjacent-pair contrast (see dataviz skill). Don't reorder or reuse

@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreClientRequest;
 use App\Http\Requests\Admin\UpdateClientRequest;
 use App\Models\Client;
 use App\Services\ClientService;
+use App\Services\FileUploadService;
 use App\Services\RenewalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class ClientController extends Controller
     public function __construct(
         private ClientService $clientService,
         private RenewalService $renewalService,
+        private FileUploadService $fileUploadService,
     ) {
     }
 
@@ -74,7 +76,13 @@ class ClientController extends Controller
 
     public function store(StoreClientRequest $request): RedirectResponse
     {
-        $this->clientService->createClient($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $this->fileUploadService->store($request->file('logo'), 'client-logos');
+        }
+
+        $this->clientService->createClient($data);
 
         return redirect()->route('admin.clients.index')->with('success', 'Client added successfully.');
     }
@@ -90,7 +98,14 @@ class ClientController extends Controller
 
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
-        $this->clientService->updateClient($client, $request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('logo')) {
+            $this->fileUploadService->delete($client->logo);
+            $data['logo'] = $this->fileUploadService->store($request->file('logo'), 'client-logos');
+        }
+
+        $this->clientService->updateClient($client, $data);
 
         return back()->with('success', 'Client updated.');
     }

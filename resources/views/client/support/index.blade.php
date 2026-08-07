@@ -8,8 +8,6 @@
                 'label' => $project->brand_name ?? $project->project_name,
             ])->values(),
         ]);
-
-    $projectsWithTickets = $projects->filter(fn ($project) => $project->tickets->isNotEmpty())->values();
 @endphp
 
 <x-client-layout title="Support">
@@ -26,62 +24,144 @@
         @endif
     </div>
 
-    <div class="mt-6 space-y-4">
-        @forelse ($projectsWithTickets as $project)
-            @php $openCount = $project->tickets->whereNotIn('status', ['resolved', 'closed'])->count(); @endphp
-            <div class="rounded-xl border border-app-border bg-white" x-data="{ open: {{ $loop->first ? 'true' : 'false' }} }">
-                <button type="button" @click="open = !open" class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
-                    <div class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
-                            <x-icon name="life-buoy" class="w-4 h-4" />
-                        </span>
-                        <div>
-                            <h2 class="font-semibold text-secondary-dark">{{ $project->brand_name ?? $project->project_name }}</h2>
-                            <p class="text-xs text-secondary">{{ $project->product->name }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        @if ($openCount > 0)
-                            <x-badge classes="bg-warning-light text-warning">{{ $openCount }} open</x-badge>
-                        @else
-                            <x-badge classes="bg-surface-alt text-secondary">{{ $project->tickets->count() }} request{{ $project->tickets->count() === 1 ? '' : 's' }}</x-badge>
-                        @endif
-                        <x-icon name="chevron-down" class="w-4 h-4 shrink-0 text-secondary transition" x-bind:class="open && '-rotate-180'" />
-                    </div>
-                </button>
+    <form method="GET" action="{{ route('client.support.index') }}" class="mt-6 rounded-xl border border-app-border bg-white p-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+            <div class="min-w-0 lg:col-span-5">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Search Ticket</label>
+                <div class="relative">
+                    <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Search by ticket no..."
+                        class="w-full rounded-lg border-app-border pl-10 text-sm shadow-sm focus:border-primary focus:ring-primary">
+                </div>
+            </div>
 
-                <div x-show="open" x-cloak class="space-y-3 border-t border-app-border p-5">
-                    @foreach ($project->tickets->sortByDesc('created_at') as $ticket)
+            <div class="min-w-0 lg:col-span-3">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Product</label>
+                <select name="product" onchange="this.form.submit()"
+                    class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                    <option value="">All Products</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}" @selected(request('product') == $product->id)>{{ $product->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="min-w-0 lg:col-span-2">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-secondary">Status</label>
+                <select name="status" onchange="this.form.submit()"
+                    class="w-full min-w-0 rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                    <option value="">All Statuses</option>
+                    @foreach (\App\Models\SupportTicket::STATUSES as $value => $label)
+                        <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex min-w-0 items-end lg:col-span-2">
+                <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark">
+                    <x-icon name="search" class="w-4 h-4" />
+                    Search
+                </button>
+            </div>
+        </div>
+
+        @if (request()->anyFilled(['search', 'product', 'status']))
+            <div class="mt-4 flex items-center gap-3">
+                <a href="{{ route('client.support.index') }}"
+                    class="inline-flex items-center gap-2 rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary hover:bg-primary-light">
+                    <x-icon name="refresh-cw" class="w-4 h-4" />
+                    Reset Filters
+                </a>
+            </div>
+        @endif
+    </form>
+
+    <div class="mt-6 overflow-hidden rounded-xl border border-app-border bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="border-b border-app-border bg-surface-alt text-xs font-medium uppercase tracking-wide text-secondary">
+                    <tr>
+                        <th scope="col" class="px-6 py-4">Ticket</th>
+                        <th scope="col" class="px-6 py-4">Brand / Project</th>
+                        <th scope="col" class="px-6 py-4">Product</th>
+                        <th scope="col" class="px-6 py-4">Category</th>
+                        <th scope="col" class="px-6 py-4">Status</th>
+                        <th scope="col" class="px-6 py-4">Submitted</th>
+                        <th scope="col" class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-app-border bg-white">
+                    @forelse ($tickets as $ticket)
                         @php
                             $statusBadge = support_ticket_status_badge($ticket->status);
                             $categoryBadge = support_ticket_category_badge($ticket->category);
                             $firstMessage = $ticket->messages->first();
                         @endphp
-                        <a href="{{ route('client.support.show', $ticket) }}" class="block rounded-xl border border-app-border bg-white p-5 hover:border-primary">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-medium text-secondary">{{ $ticket->ticket_no }}</span>
-                                        <x-badge :classes="$categoryBadge['classes']">{{ $categoryBadge['label'] }}</x-badge>
-                                    </div>
-                                    <p class="mt-2 text-sm text-secondary-dark">{{ Str::limit($firstMessage?->message, 140) }}</p>
-                                    <p class="mt-2 text-xs text-secondary/70">Submitted {{ $ticket->created_at->format('d-M-Y') }}</p>
+                        <tr class="transition-colors hover:bg-surface-alt/60">
+                            <td class="px-6 py-4">
+                                <a href="{{ route('client.support.show', $ticket) }}" class="font-medium text-secondary-dark hover:text-primary">
+                                    {{ $ticket->ticket_no }}
+                                </a>
+                                @if ($firstMessage)
+                                    <p class="mt-1 max-w-xs truncate text-xs text-secondary">{{ $firstMessage->message }}</p>
+                                @endif
+                            </td>
+
+                            <td class="px-6 py-4 text-secondary-dark">
+                                {{ $ticket->project->brand_name ?? $ticket->project->project_name }}
+                            </td>
+
+                            <td class="px-6 py-4 font-medium text-secondary-dark">
+                                {{ optional($ticket->project->product)->name ?? 'N/A' }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <x-badge :classes="$categoryBadge['classes']" dot>{{ $categoryBadge['label'] }}</x-badge>
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <x-badge :classes="$statusBadge['classes']" dot>{{ $statusBadge['label'] }}</x-badge>
+                            </td>
+
+                            <td class="whitespace-nowrap px-6 py-4 text-secondary">
+                                {{ $ticket->created_at->format('d M Y') }}
+                            </td>
+
+                            <td class="px-6 py-4 text-right">
+                                <a href="{{ route('client.support.show', $ticket) }}" title="View Ticket"
+                                    class="inline-flex items-center justify-center rounded-md border border-primary/30 bg-primary-light p-1.5 text-primary hover:border-primary/60 hover:bg-primary/20">
+                                    <x-icon name="eye" class="w-3.5 h-3.5" />
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-sm text-secondary">
+                                <div class="flex flex-col items-center justify-center">
+                                    <x-icon name="life-buoy" class="mb-3 h-12 w-12 text-gray-300" />
+                                    @if ($projects->isEmpty())
+                                        <p class="text-base font-medium text-secondary-dark">You don't have any projects assigned yet</p>
+                                    @elseif (request()->anyFilled(['search', 'product', 'status']))
+                                        <p class="text-base font-medium text-secondary-dark">No support requests match these filters</p>
+                                    @else
+                                        <p class="text-base font-medium text-secondary-dark">You haven't raised any support requests yet</p>
+                                        <p class="mt-1">Click "New Request" to get started.</p>
+                                    @endif
                                 </div>
-                                <x-badge :classes="$statusBadge['classes']" class="shrink-0">{{ $statusBadge['label'] }}</x-badge>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($tickets->hasPages())
+            <div class="border-t border-app-border bg-surface-alt px-6 py-4">
+                {{ $tickets->links() }}
             </div>
-        @empty
-            <div class="rounded-xl border border-dashed border-app-border bg-white p-10 text-center text-sm text-secondary">
-                @if ($projects->isEmpty())
-                    You don't have any projects assigned yet.
-                @else
-                    You haven't raised any support requests yet. Click "New Request" to get started.
-                @endif
-            </div>
-        @endforelse
+        @endif
     </div>
 
     @if ($projects->isNotEmpty())

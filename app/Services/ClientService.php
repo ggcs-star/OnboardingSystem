@@ -30,6 +30,7 @@ class ClientService
                 'city' => $data['city'] ?? null,
                 'state' => $data['state'] ?? null,
                 'country' => $data['country'] ?? null,
+                'logo' => $data['logo'] ?? null,
                 'status' => 'active',
             ]);
 
@@ -64,6 +65,7 @@ class ClientService
             'city' => $data['city'] ?? null,
             'state' => $data['state'] ?? null,
             'country' => $data['country'] ?? null,
+            ...(isset($data['logo']) ? ['logo' => $data['logo']] : []),
         ]);
 
         return $client;

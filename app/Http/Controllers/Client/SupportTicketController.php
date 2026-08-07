@@ -25,7 +25,28 @@ class SupportTicketController extends Controller
             ? $client->projects()->with(['product', 'tickets.messages'])->latest()->get()
             : collect();
 
-        return view('client.support.index', ['projects' => $projects]);
+        $tickets = SupportTicket::with(['project.product', 'project.client', 'messages'])
+            ->whereHas('project', fn ($query) => $query->where('client_id', $client?->id ?? 0))
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('ticket_no', 'like', '%' . $request->string('search') . '%');
+            })
+            ->when($request->filled('product'), function ($query) use ($request) {
+                $query->whereHas('project', fn ($p) => $p->where('product_id', $request->product));
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $products = $client
+            ? $client->products()->wherePivot('status', true)->orderBy('name')->get()
+            : collect();
+
+        return view('client.support.index', [
+            'projects' => $projects,
+            'tickets' => $tickets,
+            'products' => $products,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
