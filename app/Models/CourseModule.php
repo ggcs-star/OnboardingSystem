@@ -41,31 +41,18 @@ class CourseModule extends Model
     }
 
     /**
-     * Lessons and module quizzes interleaved in curriculum order — quizzes
-     * are inserted immediately after the lesson they're anchored to
-     * (after_course_lesson_id), or at the start of the module if null.
-     * Each item is tagged with a virtual `item_type` of 'lesson' or
-     * 'module_quiz'. Used by both the admin modules tab and the client
-     * single-page player so the ordering logic lives in exactly one place.
+     * Lessons and module quizzes interleaved in curriculum order, driven by
+     * the sort_order both share within this module (see the drag-and-drop
+     * reorder endpoint). Each item is tagged with a virtual `item_type` of
+     * 'lesson' or 'module_quiz'. Used by both the admin modules tab and the
+     * client single-page player so the ordering logic lives in exactly one
+     * place.
      */
     public function orderedItems(): Collection
     {
-        $quizzesByAnchor = $this->quizzes->groupBy('after_course_lesson_id');
+        $lessons = $this->lessons->map(fn (CourseLesson $lesson) => tap($lesson)->setAttribute('item_type', 'lesson'));
+        $quizzes = $this->quizzes->map(fn (CourseQuizCheckpoint $quiz) => tap($quiz)->setAttribute('item_type', 'module_quiz'));
 
-        $items = collect();
-
-        foreach ($quizzesByAnchor->get(null, collect())->sortBy('id') as $quiz) {
-            $items->push(tap($quiz)->setAttribute('item_type', 'module_quiz'));
-        }
-
-        foreach ($this->lessons as $lesson) {
-            $items->push(tap($lesson)->setAttribute('item_type', 'lesson'));
-
-            foreach ($quizzesByAnchor->get($lesson->id, collect())->sortBy('id') as $quiz) {
-                $items->push(tap($quiz)->setAttribute('item_type', 'module_quiz'));
-            }
-        }
-
-        return $items;
+        return $lessons->concat($quizzes)->sortBy('sort_order')->values();
     }
 }

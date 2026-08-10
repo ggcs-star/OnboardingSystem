@@ -1,4 +1,5 @@
 import './bootstrap';
+import './sortable-list';
 
 import Alpine from 'alpinejs';
 

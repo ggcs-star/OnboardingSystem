@@ -7,14 +7,46 @@
         <span class="font-medium text-secondary-dark">Preview</span>
     </nav>
 
-    <div class="mt-3">
-        <h1 class="text-xl font-semibold text-secondary-dark">{{ $lmsProduct->name }} — Documentation Preview</h1>
-        <p class="mt-1 text-sm text-secondary">This is a read-only preview — exactly what an assigned client sees.</p>
-    </div>
+    <div class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-12">
+        <div class="flex items-start gap-4 lg:col-span-8">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary-light p-2">
+                <img src="{{ optional($lmsProduct->product)->imageUrl() ?: asset('favicon.png') }}" alt="{{ $lmsProduct->name }}" class="h-full w-full object-contain">
+            </span>
+            <div>
+                <h1 class="text-xl font-semibold text-secondary-dark">{{ $lmsProduct->name }}</h1>
+                <p class="text-sm text-secondary">Documentation</p>
+            </div>
+        </div>
 
-    <div class="mt-6 flex flex-col gap-6 lg:flex-row">
-        <aside class="w-full shrink-0 lg:w-72">
-            <nav class="space-y-1 rounded-xl border border-app-border bg-white p-3">
+        <div class="min-w-0 rounded-xl border border-app-border bg-white p-6 lg:col-span-8 lg:p-8">
+            @if ($activeArticle)
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-secondary-dark">{{ $activeArticle->title }}</h2>
+                        @if ($activeArticle->excerpt)
+                            <p class="mt-2 text-sm text-secondary">{{ $activeArticle->excerpt }}</p>
+                        @endif
+                    </div>
+                    <a href="{{ route('admin.lms.articles.edit', $activeArticle) }}" title="Edit this article"
+                        class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-app-border px-2.5 py-1.5 text-xs font-medium text-secondary-dark hover:bg-surface-alt">
+                        <x-icon name="edit" class="w-3.5 h-3.5" />
+                        Edit
+                    </a>
+                </div>
+
+                <div class="prose prose-sm sm:prose-base mt-6 max-w-none prose-pre:overflow-x-auto prose-img:rounded-lg">
+                    {!! $activeArticle->content !!}
+                </div>
+            @else
+                <div class="py-16 text-center text-secondary">
+                    <x-icon name="file-text" class="mx-auto w-8 h-8 text-secondary/50" />
+                    <p class="mt-3 text-sm">No articles yet — add one from "Categories & Articles".</p>
+                </div>
+            @endif
+        </div>
+
+        <aside class="lg:col-span-4">
+            <nav class="sticky top-6 space-y-1 rounded-xl border border-app-border bg-white p-3">
                 @forelse ($lmsProduct->categories as $category)
                     @php
                         $categoryHasActive = $activeArticle && (
@@ -71,32 +103,5 @@
                 @endforelse
             </nav>
         </aside>
-
-        <div class="min-w-0 flex-1 rounded-xl border border-app-border bg-white p-6 lg:p-8">
-            @if ($activeArticle)
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl font-semibold text-secondary-dark">{{ $activeArticle->title }}</h2>
-                        @if ($activeArticle->excerpt)
-                            <p class="mt-2 text-sm text-secondary">{{ $activeArticle->excerpt }}</p>
-                        @endif
-                    </div>
-                    <a href="{{ route('admin.lms.articles.edit', $activeArticle) }}" title="Edit this article"
-                        class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-app-border px-2.5 py-1.5 text-xs font-medium text-secondary-dark hover:bg-surface-alt">
-                        <x-icon name="edit" class="w-3.5 h-3.5" />
-                        Edit
-                    </a>
-                </div>
-
-                <div class="prose prose-sm sm:prose-base mt-6 max-w-none prose-pre:overflow-x-auto prose-img:rounded-lg">
-                    {!! $activeArticle->content !!}
-                </div>
-            @else
-                <div class="py-16 text-center text-secondary">
-                    <x-icon name="file-text" class="mx-auto w-8 h-8 text-secondary/50" />
-                    <p class="mt-3 text-sm">No articles yet — add one from "Categories & Articles".</p>
-                </div>
-            @endif
-        </div>
     </div>
 </x-admin-layout>

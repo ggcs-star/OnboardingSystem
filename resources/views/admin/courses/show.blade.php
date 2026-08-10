@@ -12,30 +12,23 @@
         <span class="font-medium text-secondary-dark">{{ $course->title }}</span>
     </nav>
 
-    <div class="mt-3 flex items-start justify-between gap-4">
-        <div class="flex items-start gap-4">
-            @if ($course->thumbnailUrl())
-                <img src="{{ $course->thumbnailUrl() }}" alt="" class="h-12 w-12 shrink-0 rounded-lg object-cover">
-            @else
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
-                    <x-icon name="video" class="w-6 h-6" />
-                </span>
-            @endif
-            <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="text-xl font-semibold text-secondary-dark">{{ $course->title }}</h1>
-                    <x-badge :classes="status_badge_classes($course->is_published)" dot>
-                        {{ $course->is_published ? 'Published' : 'Draft' }}
-                    </x-badge>
-                </div>
-                <p class="text-sm text-secondary">{{ $course->product?->name }} — manage details, modules and lessons.</p>
+    <div class="mt-3 flex items-start gap-4">
+        @if ($course->thumbnailUrl())
+            <img src="{{ $course->thumbnailUrl() }}" alt="" class="h-12 w-12 shrink-0 rounded-lg object-cover">
+        @else
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary">
+                <x-icon name="video" class="w-6 h-6" />
+            </span>
+        @endif
+        <div>
+            <div class="flex items-center gap-2">
+                <h1 class="text-xl font-semibold text-secondary-dark">{{ $course->title }}</h1>
+                <x-badge :classes="status_badge_classes($course->is_published)" dot>
+                    {{ $course->is_published ? 'Published' : 'Draft' }}
+                </x-badge>
             </div>
+            <p class="text-sm text-secondary">{{ $course->product?->name }} — manage details, modules and lessons.</p>
         </div>
-        <a href="{{ route('admin.courses.preview', $course) }}" target="_blank"
-            class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-chart-4/30 bg-chart-4/15 px-4 py-2 text-sm font-medium text-chart-4 hover:border-chart-4/60 hover:bg-chart-4/25">
-            <x-icon name="eye" class="w-4 h-4" />
-            Preview as Client
-        </a>
     </div>
 
     <div class="mt-6 border-b border-app-border">

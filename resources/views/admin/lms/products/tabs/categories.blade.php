@@ -14,10 +14,11 @@
     </a>
 </div>
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" data-sortable data-sortable-url="{{ route('admin.lms.categories.reorder', $lmsProduct) }}">
     @forelse ($categories as $category)
-        <div x-data="{ open: true }" class="rounded-xl border border-app-border bg-white">
+        <div x-data="{ open: true }" data-sortable-item draggable="true" data-sortable-id="{{ $category->id }}" class="cursor-move select-none rounded-xl border border-app-border bg-white" title="Drag to reorder">
             <div class="flex items-center justify-between gap-3 px-4 py-3">
+                <x-icon name="grip" class="w-4 h-4 shrink-0 text-secondary/60" />
                 <button type="button" x-on:click="open = !open" class="flex flex-1 items-center gap-2 text-left">
                     <x-icon name="chevron-down" class="w-4 h-4 text-secondary transition-transform" x-bind:class="!open && '-rotate-90'" />
                     <span class="font-semibold text-secondary-dark">{{ $category->name }}</span>
@@ -56,36 +57,46 @@
                 @endif
 
                 {{-- Articles directly under the category (no sub-category) --}}
-                @forelse ($category->articles as $article)
-                    <div class="flex items-center justify-between gap-3 px-4 py-2.5 pl-11">
-                        <span class="flex items-center gap-2 text-sm text-secondary-dark">
-                            <x-icon name="file-text" class="w-4 h-4 text-secondary" />
-                            {{ $article->title }}
-                            @unless ($article->is_published)
-                                <x-badge classes="bg-secondary-light text-secondary">Draft</x-badge>
-                            @endunless
-                        </span>
-                        <div class="flex items-center gap-1">
-                            <a href="{{ route('admin.lms.articles.edit', $article) }}"
-                                class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Edit article">
-                                <x-icon name="edit" class="w-3.5 h-3.5" />
-                            </a>
-                            <form method="POST" action="{{ route('admin.lms.articles.destroy', $article) }}" onsubmit="return confirm('Delete this article?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="rounded-md p-1.5 text-secondary hover:bg-danger-light hover:text-danger" title="Delete article">
-                                    <x-icon name="trash" class="w-3.5 h-3.5" />
-                                </button>
-                            </form>
-                        </div>
+                @if ($category->articles->isNotEmpty())
+                    <div data-sortable data-sortable-url="{{ route('admin.lms.categories.articles.reorder', $category) }}">
+                        @foreach ($category->articles as $article)
+                            <div data-sortable-item draggable="true" data-sortable-id="{{ $article->id }}" class="cursor-move select-none flex items-center justify-between gap-3 px-4 py-2.5 pl-11" title="Drag to reorder">
+                                <span class="flex items-center gap-2 text-sm text-secondary-dark">
+                                    <x-icon name="grip" class="w-3.5 h-3.5 shrink-0 text-secondary/60" />
+                                    <x-icon name="file-text" class="w-4 h-4 text-secondary" />
+                                    {{ $article->title }}
+                                    @unless ($article->is_published)
+                                        <x-badge classes="bg-secondary-light text-secondary">Draft</x-badge>
+                                    @endunless
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    <a href="{{ route('admin.lms.products.preview.article', ['lmsProduct' => $lmsProduct, 'lmsArticle' => $article]) }}" target="_blank"
+                                        class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="View article">
+                                        <x-icon name="eye" class="w-3.5 h-3.5" />
+                                    </a>
+                                    <a href="{{ route('admin.lms.articles.edit', $article) }}"
+                                        class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Edit article">
+                                        <x-icon name="edit" class="w-3.5 h-3.5" />
+                                    </a>
+                                    <form method="POST" action="{{ route('admin.lms.articles.destroy', $article) }}" onsubmit="return confirm('Delete this article?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="rounded-md p-1.5 text-secondary hover:bg-danger-light hover:text-danger" title="Delete article">
+                                            <x-icon name="trash" class="w-3.5 h-3.5" />
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                @empty
-                @endforelse
+                @endif
 
                 {{-- Sub-categories --}}
+                <div data-sortable data-sortable-url="{{ route('admin.lms.sub-categories.reorder', $category) }}">
                 @foreach ($category->subCategories as $subCategory)
-                    <div x-data="{ subOpen: true }">
+                    <div x-data="{ subOpen: true }" data-sortable-item draggable="true" data-sortable-id="{{ $subCategory->id }}" class="cursor-move select-none" title="Drag to reorder">
                         <div class="flex items-center justify-between gap-3 bg-surface-alt/60 px-4 py-2.5 pl-7">
+                            <x-icon name="grip" class="w-3.5 h-3.5 shrink-0 text-secondary/60" />
                             <button type="button" x-on:click="subOpen = !subOpen" class="flex flex-1 items-center gap-2 text-left text-sm font-medium text-secondary-dark">
                                 <x-icon name="chevron-down" class="w-3.5 h-3.5 text-secondary transition-transform" x-bind:class="!subOpen && '-rotate-90'" />
                                 <x-icon name="folder" class="w-4 h-4 text-secondary" />
@@ -118,35 +129,45 @@
                         </div>
 
                         <div x-show="subOpen" x-cloak>
-                            @forelse ($subCategory->articles as $article)
-                                <div class="flex items-center justify-between gap-3 px-4 py-2.5 pl-16">
-                                    <span class="flex items-center gap-2 text-sm text-secondary-dark">
-                                        <x-icon name="file-text" class="w-4 h-4 text-secondary" />
-                                        {{ $article->title }}
-                                        @unless ($article->is_published)
-                                            <x-badge classes="bg-secondary-light text-secondary">Draft</x-badge>
-                                        @endunless
-                                    </span>
-                                    <div class="flex items-center gap-1">
-                                        <a href="{{ route('admin.lms.articles.edit', $article) }}"
-                                            class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Edit article">
-                                            <x-icon name="edit" class="w-3.5 h-3.5" />
-                                        </a>
-                                        <form method="POST" action="{{ route('admin.lms.articles.destroy', $article) }}" onsubmit="return confirm('Delete this article?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="rounded-md p-1.5 text-secondary hover:bg-danger-light hover:text-danger" title="Delete article">
-                                                <x-icon name="trash" class="w-3.5 h-3.5" />
-                                            </button>
-                                        </form>
-                                    </div>
+                            @if ($subCategory->articles->isNotEmpty())
+                                <div data-sortable data-sortable-url="{{ route('admin.lms.sub-categories.articles.reorder', $subCategory) }}">
+                                    @foreach ($subCategory->articles as $article)
+                                        <div data-sortable-item draggable="true" data-sortable-id="{{ $article->id }}" class="cursor-move select-none flex items-center justify-between gap-3 px-4 py-2.5 pl-16" title="Drag to reorder">
+                                            <span class="flex items-center gap-2 text-sm text-secondary-dark">
+                                                <x-icon name="grip" class="w-3.5 h-3.5 shrink-0 text-secondary/60" />
+                                                <x-icon name="file-text" class="w-4 h-4 text-secondary" />
+                                                {{ $article->title }}
+                                                @unless ($article->is_published)
+                                                    <x-badge classes="bg-secondary-light text-secondary">Draft</x-badge>
+                                                @endunless
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <a href="{{ route('admin.lms.products.preview.article', ['lmsProduct' => $lmsProduct, 'lmsArticle' => $article]) }}" target="_blank"
+                                                    class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="View article">
+                                                    <x-icon name="eye" class="w-3.5 h-3.5" />
+                                                </a>
+                                                <a href="{{ route('admin.lms.articles.edit', $article) }}"
+                                                    class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Edit article">
+                                                    <x-icon name="edit" class="w-3.5 h-3.5" />
+                                                </a>
+                                                <form method="POST" action="{{ route('admin.lms.articles.destroy', $article) }}" onsubmit="return confirm('Delete this article?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="rounded-md p-1.5 text-secondary hover:bg-danger-light hover:text-danger" title="Delete article">
+                                                        <x-icon name="trash" class="w-3.5 h-3.5" />
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @empty
+                            @else
                                 <p class="px-4 py-3 pl-16 text-xs text-secondary">No articles yet.</p>
-                            @endforelse
+                            @endif
                         </div>
                     </div>
                 @endforeach
+                </div>
             </div>
         </div>
 

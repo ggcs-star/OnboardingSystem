@@ -124,37 +124,34 @@
                     </tr>
 
                     <x-modal name="change-stage-{{ $project->id }}" focusable>
-                        <form method="POST" action="{{ route('admin.projects.stage.update', $project) }}" class="p-6"
+                        <form method="POST" action="{{ route('admin.projects.stage.update', $project) }}"
                             onsubmit="return confirm('Change the stage to \'' + document.getElementById('stage-select-{{ $project->id }}').selectedOptions[0].text + '\'? Every stage before it will be marked complete.')">
                             @csrf
                             @method('PATCH')
 
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h2 class="text-lg font-semibold text-secondary-dark">Change Pipeline Stage</h2>
-                                    <p class="text-xs text-secondary">{{ $project->brand_name ?? $project->project_name }}</p>
+                            <div class="border-b border-app-border px-6 py-5">
+                                <h2 class="text-lg font-semibold text-secondary-dark">Change Pipeline Stage</h2>
+                                <p class="mt-0.5 text-xs text-secondary">{{ $project->brand_name ?? $project->project_name }}</p>
+                            </div>
+
+                            <div class="px-6 py-6">
+                                <div class="overflow-x-auto pb-1">
+                                    <x-project-timeline :stage="$project->current_stage" :status="$project->status" show-labels />
                                 </div>
-                                <button type="button" x-on:click="$dispatch('close')" class="text-secondary hover:text-secondary-dark">
-                                    <x-icon name="x" class="w-5 h-5" />
-                                </button>
+
+                                <div class="mt-6">
+                                    <x-input-label value="Set Stage To" class="text-xs uppercase tracking-wide" />
+                                    <select id="stage-select-{{ $project->id }}" name="stage"
+                                        class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
+                                        @foreach (\App\Models\Project::STAGES as $key => $label)
+                                            <option value="{{ $key }}" @selected($project->current_stage === $key)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="mt-1.5 text-xs text-secondary">Every stage before the one you pick will be marked complete.</p>
+                                </div>
                             </div>
 
-                            <div class="mt-6 overflow-x-auto pb-1">
-                                <x-project-timeline :stage="$project->current_stage" :status="$project->status" show-labels />
-                            </div>
-
-                            <div class="mt-6">
-                                <x-input-label value="Set Stage To" class="text-xs uppercase tracking-wide" />
-                                <select id="stage-select-{{ $project->id }}" name="stage"
-                                    class="mt-1.5 w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">
-                                    @foreach (\App\Models\Project::STAGES as $key => $label)
-                                        <option value="{{ $key }}" @selected($project->current_stage === $key)>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                                <p class="mt-1.5 text-xs text-secondary">Every stage before the one you pick will be marked complete.</p>
-                            </div>
-
-                            <div class="mt-6 flex justify-between">
+                            <div class="flex justify-end gap-3 border-t border-app-border bg-surface-alt px-6 py-4">
                                 <x-secondary-button type="button" x-on:click="$dispatch('close')">Cancel</x-secondary-button>
                                 <x-primary-button type="submit">Update Stage</x-primary-button>
                             </div>

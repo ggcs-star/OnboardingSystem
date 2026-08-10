@@ -14,10 +14,11 @@
     </button>
 </div>
 
-<div class="mt-6 space-y-4">
+<div class="mt-6 space-y-4" data-sortable data-sortable-url="{{ route('admin.course-modules.reorder', $course) }}">
     @forelse ($modules as $module)
-        <div x-data="{ open: true }" class="rounded-xl border border-app-border bg-white">
+        <div x-data="{ open: true }" data-sortable-item draggable="true" data-sortable-id="{{ $module->id }}" class="cursor-move select-none rounded-xl border border-app-border bg-white" title="Drag to reorder">
             <div class="flex items-center justify-between gap-3 px-4 py-3">
+                <x-icon name="grip" class="w-4 h-4 shrink-0 text-secondary/60" />
                 <button type="button" x-on:click="open = !open" class="flex flex-1 items-center gap-2 text-left">
                     <x-icon name="chevron-down" class="w-4 h-4 text-secondary transition-transform" x-bind:class="!open && '-rotate-90'" />
                     <span class="font-semibold text-secondary-dark">{{ $module->title }}</span>
@@ -53,11 +54,13 @@
                     <p class="px-4 py-3 text-sm text-secondary">{{ $module->description }}</p>
                 @endif
 
+                <div data-sortable data-sortable-url="{{ route('admin.course-modules.items.reorder', $module) }}">
                 @forelse ($module->orderedItems() as $item)
                     @if ($item->item_type === 'lesson')
                         @php $lesson = $item; @endphp
-                        <div class="flex items-center justify-between gap-3 px-4 py-2.5 pl-11">
+                        <div data-sortable-item draggable="true" data-sortable-id="lesson-{{ $lesson->id }}" class="cursor-move select-none flex items-center justify-between gap-3 px-4 py-2.5 pl-11" title="Drag to reorder">
                             <span class="flex items-center gap-2 text-sm text-secondary-dark">
+                                <x-icon name="grip" class="w-3.5 h-3.5 shrink-0 text-secondary/60" />
                                 <x-icon name="{{ $lesson->video_source === 'youtube' ? 'video' : 'play-circle' }}" class="w-4 h-4 text-secondary" />
                                 {{ $lesson->title }}
                                 <span class="text-xs text-secondary">
@@ -66,6 +69,10 @@
                                 </span>
                             </span>
                             <div class="flex items-center gap-1">
+                                <a href="{{ route('admin.courses.preview', $course) }}?item=lesson-{{ $lesson->id }}" target="_blank"
+                                    class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="View lesson">
+                                    <x-icon name="eye" class="w-3.5 h-3.5" />
+                                </a>
                                 <a href="{{ route('admin.course-lessons.edit', $lesson) }}"
                                     class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Edit lesson">
                                     <x-icon name="edit" class="w-3.5 h-3.5" />
@@ -81,8 +88,9 @@
                         </div>
                     @else
                         @php $quiz = $item; @endphp
-                        <div class="flex items-center justify-between gap-3 bg-warning-light/40 px-4 py-2.5 pl-11">
+                        <div data-sortable-item draggable="true" data-sortable-id="quiz-{{ $quiz->id }}" class="cursor-move select-none flex items-center justify-between gap-3 bg-warning-light/40 px-4 py-2.5 pl-11" title="Drag to reorder">
                             <span class="flex items-center gap-2 text-sm text-secondary-dark">
+                                <x-icon name="grip" class="w-3.5 h-3.5 shrink-0 text-secondary/60" />
                                 <x-icon name="help-circle" class="w-4 h-4 text-warning" />
                                 {{ $quiz->title }}
                                 <x-badge :classes="$quiz->is_required ? 'bg-warning-light text-warning' : 'bg-surface-alt text-secondary'">
@@ -91,6 +99,10 @@
                                 <span class="text-xs text-secondary">{{ $quiz->questions->count() }} {{ Str::plural('question', $quiz->questions->count()) }}, {{ $quiz->questions->sum('points') }} {{ Str::plural('pt', $quiz->questions->sum('points')) }}</span>
                             </span>
                             <div class="flex items-center gap-1">
+                                <a href="{{ route('admin.courses.preview', $course) }}?item=quiz-{{ $quiz->id }}" target="_blank"
+                                    class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="View quiz">
+                                    <x-icon name="eye" class="w-3.5 h-3.5" />
+                                </a>
                                 <a href="{{ route('admin.course-module-quizzes.edit', $quiz) }}"
                                     class="rounded-md p-1.5 text-secondary hover:bg-surface-alt hover:text-secondary-dark" title="Manage quiz">
                                     <x-icon name="edit" class="w-3.5 h-3.5" />
@@ -108,6 +120,7 @@
                 @empty
                     <p class="px-4 py-3 pl-11 text-xs text-secondary">No lessons yet.</p>
                 @endforelse
+                </div>
 
                 <div class="flex items-center gap-4 px-4 py-2.5 pl-11">
                     <a href="{{ route('admin.course-lessons.create', $module) }}"

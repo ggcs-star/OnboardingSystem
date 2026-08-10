@@ -8,6 +8,7 @@ use App\Models\LmsCategory;
 use App\Models\LmsProduct;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class LmsCategoryController extends Controller
@@ -52,6 +53,17 @@ class LmsCategoryController extends Controller
         return redirect()
             ->route('admin.lms.products.show', ['lmsProduct' => $productId, 'tab' => 'categories'])
             ->with('success', 'Category removed.');
+    }
+
+    public function reorder(Request $request, LmsProduct $lmsProduct): RedirectResponse
+    {
+        $ids = $request->validate(['ids' => ['required', 'array']])['ids'];
+
+        foreach ($ids as $index => $id) {
+            LmsCategory::where('id', $id)->where('lms_product_id', $lmsProduct->id)->update(['sort_order' => $index + 1]);
+        }
+
+        return redirect()->back();
     }
 
     private function uniqueSlug(LmsProduct $lmsProduct, string $name): string
