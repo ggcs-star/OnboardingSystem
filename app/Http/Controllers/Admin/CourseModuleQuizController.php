@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\CourseModule;
 use App\Models\CourseQuizCheckpoint;
+use App\Services\CourseModuleItemOrderer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,6 +13,10 @@ use Illuminate\View\View;
 
 class CourseModuleQuizController extends Controller
 {
+    public function __construct(private CourseModuleItemOrderer $itemOrderer)
+    {
+    }
+
     public function store(Request $request, CourseModule $courseModule): RedirectResponse
     {
         $data = $this->validateQuiz($request, $courseModule);
@@ -22,6 +27,8 @@ class CourseModuleQuizController extends Controller
             'after_course_lesson_id' => $data['after_course_lesson_id'] ?: null,
             'is_required' => $data['is_required'],
         ]);
+
+        $this->itemOrderer->resequence($courseModule);
 
         return redirect()
             ->route('admin.course-module-quizzes.edit', $quiz)

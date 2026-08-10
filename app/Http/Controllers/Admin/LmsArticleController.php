@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreLmsArticleRequest;
 use App\Http\Requests\Admin\UpdateLmsArticleRequest;
 use App\Models\LmsArticle;
+use App\Models\LmsCategory;
 use App\Models\LmsProduct;
+use App\Models\LmsSubCategory;
 use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -79,6 +81,31 @@ class LmsArticleController extends Controller
         $path = $this->fileUploadService->store($request->file('file'), 'lms-articles');
 
         return response()->json(['location' => asset('storage/' . $path)]);
+    }
+
+    public function reorderInCategory(Request $request, LmsCategory $lmsCategory): RedirectResponse
+    {
+        $ids = $request->validate(['ids' => ['required', 'array']])['ids'];
+
+        foreach ($ids as $index => $id) {
+            LmsArticle::where('id', $id)
+                ->where('lms_category_id', $lmsCategory->id)
+                ->whereNull('lms_sub_category_id')
+                ->update(['sort_order' => $index + 1]);
+        }
+
+        return redirect()->back();
+    }
+
+    public function reorderInSubCategory(Request $request, LmsSubCategory $lmsSubCategory): RedirectResponse
+    {
+        $ids = $request->validate(['ids' => ['required', 'array']])['ids'];
+
+        foreach ($ids as $index => $id) {
+            LmsArticle::where('id', $id)->where('lms_sub_category_id', $lmsSubCategory->id)->update(['sort_order' => $index + 1]);
+        }
+
+        return redirect()->back();
     }
 
     private function uniqueSlug(LmsProduct $lmsProduct, string $title): string

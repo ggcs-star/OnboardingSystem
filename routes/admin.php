@@ -112,10 +112,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/lms/products/{lmsProduct}/categories', [LmsCategoryController::class, 'store'])->name('lms.categories.store');
     Route::put('/lms/categories/{lmsCategory}', [LmsCategoryController::class, 'update'])->name('lms.categories.update');
     Route::delete('/lms/categories/{lmsCategory}', [LmsCategoryController::class, 'destroy'])->name('lms.categories.destroy');
+    Route::post('/lms/products/{lmsProduct}/categories/reorder', [LmsCategoryController::class, 'reorder'])->name('lms.categories.reorder');
 
     Route::post('/lms/categories/{lmsCategory}/sub-categories', [LmsSubCategoryController::class, 'store'])->name('lms.sub-categories.store');
     Route::put('/lms/sub-categories/{lmsSubCategory}', [LmsSubCategoryController::class, 'update'])->name('lms.sub-categories.update');
     Route::delete('/lms/sub-categories/{lmsSubCategory}', [LmsSubCategoryController::class, 'destroy'])->name('lms.sub-categories.destroy');
+    Route::post('/lms/categories/{lmsCategory}/sub-categories/reorder', [LmsSubCategoryController::class, 'reorder'])->name('lms.sub-categories.reorder');
 
     Route::get('/lms/products/{lmsProduct}/articles/create', [LmsArticleController::class, 'create'])->name('lms.articles.create');
     Route::post('/lms/products/{lmsProduct}/articles', [LmsArticleController::class, 'store'])->name('lms.articles.store');
@@ -123,6 +125,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('/lms/articles/{lmsArticle}', [LmsArticleController::class, 'update'])->name('lms.articles.update');
     Route::delete('/lms/articles/{lmsArticle}', [LmsArticleController::class, 'destroy'])->name('lms.articles.destroy');
     Route::post('/lms/articles/upload-image', [LmsArticleController::class, 'uploadImage'])->name('lms.articles.upload-image');
+    Route::post('/lms/categories/{lmsCategory}/articles/reorder', [LmsArticleController::class, 'reorderInCategory'])->name('lms.categories.articles.reorder');
+    Route::post('/lms/sub-categories/{lmsSubCategory}/articles/reorder', [LmsArticleController::class, 'reorderInSubCategory'])->name('lms.sub-categories.articles.reorder');
 
     Route::get('/lms/products/{lmsProduct}/clients', [LmsProductClientController::class, 'index'])->name('lms.products.clients.index');
 
@@ -147,7 +151,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/course-lessons/{courseLesson}/edit', [CourseLessonController::class, 'edit'])->name('course-lessons.edit');
     Route::put('/course-lessons/{courseLesson}', [CourseLessonController::class, 'update'])->name('course-lessons.update');
     Route::delete('/course-lessons/{courseLesson}', [CourseLessonController::class, 'destroy'])->name('course-lessons.destroy');
-    Route::post('/course-modules/{courseModule}/lessons/reorder', [CourseLessonController::class, 'reorder'])->name('course-lessons.reorder');
+    Route::post('/course-modules/{courseModule}/items/reorder', [CourseModuleController::class, 'reorderItems'])->name('course-modules.items.reorder');
 
     Route::post('/course-lessons/{courseLesson}/checkpoints', [CourseQuizCheckpointController::class, 'store'])->name('course-quiz-checkpoints.store');
     Route::put('/course-quiz-checkpoints/{checkpoint}', [CourseQuizCheckpointController::class, 'update'])->name('course-quiz-checkpoints.update');

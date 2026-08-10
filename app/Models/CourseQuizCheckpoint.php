@@ -19,6 +19,7 @@ class CourseQuizCheckpoint extends Model
         'after_course_lesson_id',
         'is_required',
         'title',
+        'sort_order',
     ];
 
     protected $casts = [

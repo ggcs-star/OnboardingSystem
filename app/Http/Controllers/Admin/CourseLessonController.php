@@ -68,17 +68,6 @@ class CourseLessonController extends Controller
             ->with('success', 'Lesson removed.');
     }
 
-    public function reorder(Request $request, CourseModule $courseModule): RedirectResponse
-    {
-        $ids = $request->validate(['ids' => ['required', 'array']])['ids'];
-
-        foreach ($ids as $index => $id) {
-            CourseLesson::where('id', $id)->where('course_module_id', $courseModule->id)->update(['sort_order' => $index + 1]);
-        }
-
-        return redirect()->back();
-    }
-
     private function validateLesson(Request $request): array
     {
         if ($request->filled('video_url')) {
