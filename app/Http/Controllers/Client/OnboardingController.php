@@ -26,18 +26,38 @@ class OnboardingController extends Controller
     {
         $client = $request->user()->client;
 
-        $assignedProducts = $client
-            ? $client->products()->where('active', true)->orderBy('name')->get()
+        $projectsByProduct = $client
+            ? $client->projects->groupBy('product_id')
             : collect();
+
+        // A client can only add a new brand for a product while they still
+        // have an unused brand slot (granted at assignment, and again each
+        // time an admin approves a fresh "show interest" inquiry). Once every
+        // slot is used, the product drops back into "Other Products" until
+        // the client shows interest again and gets re-approved.
+        $assignedProducts = collect();
+
+        if ($client) {
+            $clientProducts = $client->clientProducts()
+                ->with('product')
+                ->whereHas('product', fn ($query) => $query->where('active', true))
+                ->get();
+
+            foreach ($clientProducts as $clientProduct) {
+                $usedSlots = $projectsByProduct->get($clientProduct->product_id, collect())->count();
+
+                if ($usedSlots < $clientProduct->brand_slots) {
+                    $assignedProducts->push($clientProduct->product);
+                }
+            }
+
+            $assignedProducts = $assignedProducts->sortBy('name')->values();
+        }
 
         $otherProducts = Product::where('active', true)
             ->whereNotIn('id', $assignedProducts->pluck('id'))
             ->orderBy('name')
             ->get();
-
-        $projectsByProduct = $client
-            ? $client->projects->groupBy('product_id')
-            : collect();
 
         return view('client.onboarding.index', [
             'client' => $client,
@@ -52,6 +72,14 @@ class OnboardingController extends Controller
         $client = $request->user()->client;
 
         abort_unless($client, 403);
+
+        $clientProduct = $client->clientProducts()->where('product_id', $product->id)->first();
+
+        if (! $clientProduct || ! $clientProduct->hasAvailableBrandSlot()) {
+            return back()->withErrors([
+                'brand_name' => 'You\'ve used your available brand slot for this product. Show interest again to request another.',
+            ]);
+        }
 
         $data = $request->validate([
             'brand_name' => ['required', 'string', 'max:255'],
@@ -74,6 +102,7 @@ class OnboardingController extends Controller
 
         $project = $this->projectService->createProject([
             'client_id' => $client->id,
+            'client_product_id' => $clientProduct->id,
             'product_id' => $product->id,
             'project_name' => $product->name,
             'brand_name' => $brandName,

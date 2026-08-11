@@ -125,8 +125,8 @@
                                 {{ optional($ticket->project->product)->name ?? 'N/A' }}
                             </td>
 
-                            <td class="px-6 py-4">
-                                <x-badge :classes="$categoryBadge['classes']" dot>{{ $categoryBadge['label'] }}</x-badge>
+                            <td class="whitespace-nowrap px-6 py-4">
+                                <x-badge :classes="$categoryBadge['classes']" class="whitespace-nowrap">{{ $categoryBadge['label'] }}</x-badge>
                             </td>
 
                             <td class="px-6 py-4">

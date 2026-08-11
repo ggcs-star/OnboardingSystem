@@ -67,7 +67,7 @@
                         <th scope="col" class="px-6 py-4">Product</th>
                         <th scope="col" class="px-6 py-4">Status</th>
                         <th scope="col" class="px-6 py-4">Submitted</th>
-                        <th scope="col" class="px-6 py-4">Review</th>
+                        <th scope="col" class="px-6 py-4">Action</th>
                     </tr>
                 </thead>
 
@@ -105,22 +105,83 @@
                                 {{ $customizationRequest->created_at->format('d M Y') }}
                             </td>
 
-                            <td class="min-w-[280px] px-6 py-4">
-                                <form method="POST" action="{{ route('admin.projects.customization-requests.update', ['project' => $customizationRequest->project, 'customizationRequest' => $customizationRequest]) }}" class="space-y-2">
+                            <td class="px-6 py-4">
+                                <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'review-{{ $customizationRequest->id }}')"
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary-light px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20">
+                                    <x-icon name="message-square" class="w-3.5 h-3.5" />
+                                    Review
+                                </button>
+                            </td>
+                        </tr>
+
+                        <x-modal :name="'review-' . $customizationRequest->id" maxWidth="lg">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h2 class="text-lg font-semibold text-secondary-dark">{{ $customizationRequest->title }}</h2>
+                                        <p class="mt-0.5 text-xs text-secondary">
+                                            {{ $customizationRequest->project->client->company_name }}
+                                            &middot; {{ $customizationRequest->project->project_name }}
+                                            &middot; {{ optional($customizationRequest->project->product)->name ?? 'N/A' }}
+                                        </p>
+                                    </div>
+                                    <button type="button" x-on:click="$dispatch('close')" class="shrink-0 text-secondary hover:text-secondary-dark">
+                                        <x-icon name="x" class="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <div class="mt-5 max-h-80 space-y-4 overflow-y-auto pr-1">
+                                    <!-- Client's request -->
+                                    <div class="flex items-start gap-2.5">
+                                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-light text-xs font-semibold text-secondary-dark">
+                                            {{ Str::substr($customizationRequest->createdBy->name, 0, 1) }}
+                                        </span>
+                                        <div class="max-w-[85%] rounded-2xl rounded-tl-sm bg-surface-alt px-4 py-2.5">
+                                            <p class="whitespace-pre-line text-sm text-secondary-dark">{{ $customizationRequest->description }}</p>
+                                            <p class="mt-1.5 text-[11px] text-secondary">
+                                                {{ $customizationRequest->createdBy->name }} &middot; {{ $customizationRequest->created_at->format('d M Y, g:i A') }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Admin's response, if already reviewed -->
+                                    @if ($customizationRequest->reviewed_at || $customizationRequest->admin_notes)
+                                        @php $modalBadge = customization_status_badge($customizationRequest->status); @endphp
+                                        <div class="flex items-start justify-end gap-2.5">
+                                            <div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary-light px-4 py-2.5">
+                                                <x-badge :classes="$modalBadge['classes']" dot class="mb-1.5">{{ $modalBadge['label'] }}</x-badge>
+                                                @if ($customizationRequest->admin_notes)
+                                                    <p class="whitespace-pre-line text-sm text-secondary-dark">{{ $customizationRequest->admin_notes }}</p>
+                                                @endif
+                                                <p class="mt-1.5 text-[11px] text-secondary">
+                                                    {{ optional($customizationRequest->reviewedBy)->name ?? 'Admin' }}
+                                                    @if ($customizationRequest->reviewed_at)
+                                                        &middot; {{ $customizationRequest->reviewed_at->format('d M Y, g:i A') }}
+                                                    @endif
+                                                </p>
+                                            </div>
+                                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white">
+                                                {{ Str::substr(optional($customizationRequest->reviewedBy)->name ?? 'A', 0, 1) }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <form method="POST" action="{{ route('admin.projects.customization-requests.update', ['project' => $customizationRequest->project, 'customizationRequest' => $customizationRequest]) }}" class="mt-5 space-y-3 border-t border-app-border pt-4">
                                     @csrf
                                     @method('PATCH')
 
-                                    <textarea name="admin_notes" rows="2" placeholder="Let the client know what's possible and what isn't..."
+                                    <textarea name="admin_notes" rows="3" placeholder="Let the client know what's possible and what isn't..."
                                         class="w-full rounded-lg border-app-border text-sm shadow-sm focus:border-primary focus:ring-primary">{{ old('admin_notes', $customizationRequest->admin_notes) }}</textarea>
 
-                                    <div class="flex flex-wrap gap-2">
-                                        <button type="submit" name="status" value="approved" class="rounded-lg bg-success-light px-3 py-1.5 text-xs font-medium text-success hover:opacity-80">Approve</button>
-                                        <button type="submit" name="status" value="partial" class="rounded-lg bg-primary-light px-3 py-1.5 text-xs font-medium text-primary hover:opacity-80">Partial</button>
-                                        <button type="submit" name="status" value="rejected" class="rounded-lg bg-danger-light px-3 py-1.5 text-xs font-medium text-danger hover:opacity-80">Reject</button>
+                                    <div class="flex flex-wrap justify-end gap-2">
+                                        <button type="submit" name="status" value="approved" class="rounded-lg bg-success-light px-4 py-2 text-xs font-medium text-success hover:opacity-80">Approve</button>
+                                        <button type="submit" name="status" value="partial" class="rounded-lg bg-primary-light px-4 py-2 text-xs font-medium text-primary hover:opacity-80">Partial</button>
+                                        <button type="submit" name="status" value="rejected" class="rounded-lg bg-danger-light px-4 py-2 text-xs font-medium text-danger hover:opacity-80">Reject</button>
                                     </div>
                                 </form>
-                            </td>
-                        </tr>
+                            </div>
+                        </x-modal>
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-sm text-secondary">

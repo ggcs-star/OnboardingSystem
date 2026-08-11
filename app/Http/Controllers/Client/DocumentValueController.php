@@ -41,7 +41,13 @@ class DocumentValueController extends Controller
     {
         abort_unless($project->client->user_id === $request->user()->id, 403);
 
+        $onlyGroup = $request->input('group');
+
         foreach ($project->documentEntries() as $entry) {
+            if ($onlyGroup !== null && $entry->group_slug !== $onlyGroup) {
+                continue;
+            }
+
             if ($entry->status === 'approved') {
                 continue;
             }
@@ -58,7 +64,9 @@ class DocumentValueController extends Controller
 
         $this->renewalService->activateIfReady($project);
 
-        if ($request->boolean('onboarding')) {
+        [$mandatoryDone, $mandatoryTotal] = $project->mandatoryDocumentsProgress();
+
+        if ($request->boolean('onboarding') && $mandatoryDone === $mandatoryTotal) {
             return redirect()->route('client.onboarding.subscription', $project);
         }
 

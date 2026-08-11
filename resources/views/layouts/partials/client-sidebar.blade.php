@@ -1,9 +1,3 @@
-@php
-    $portalClient = Auth::user()->client;
-    $portalName = $portalClient?->company_name ?? 'Client Portal';
-    $portalLogoUrl = $portalClient?->logoUrl();
-@endphp
-
 <aside
     x-data="{ collapsed: false }"
     :class="collapsed ? 'w-20' : 'w-64'"
@@ -11,15 +5,8 @@
 >
     <div class="flex items-center justify-between px-4 py-5">
         <a href="{{ route('client.dashboard') }}" class="flex min-w-0 items-center overflow-hidden rounded-lg bg-white p-1.5 shadow-sm" :class="collapsed && 'justify-center'">
-            @if ($portalLogoUrl)
-                <img x-show="!collapsed" x-cloak src="{{ $portalLogoUrl }}" alt="{{ $portalName }}" class="h-8 w-auto max-w-[165px] shrink-0 object-contain">
-                <img x-show="collapsed" x-cloak src="{{ $portalLogoUrl }}" alt="{{ $portalName }}" class="h-9 w-9 shrink-0 rounded object-cover">
-            @else
-                <span x-show="!collapsed" x-cloak class="flex h-8 max-w-[165px] items-center truncate px-1.5 text-sm font-semibold text-secondary-dark" title="{{ $portalName }}">{{ $portalName }}</span>
-                <span x-show="collapsed" x-cloak class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-sm font-semibold text-primary">
-                    {{ Str::substr($portalName, 0, 1) }}
-                </span>
-            @endif
+            <img x-show="!collapsed" x-cloak src="{{ asset('assets/images/logo.webp') }}" alt="{{ config('app.name', 'Client Portal') }}" class="h-8 w-auto max-w-[165px] shrink-0 object-contain">
+            <img x-show="collapsed" x-cloak src="{{ asset('assets/images/logo-mark.png') }}" alt="{{ config('app.name', 'Client Portal') }}" class="h-9 w-9 shrink-0 rounded object-cover">
         </a>
         <button @click="collapsed = !collapsed" x-show="!collapsed" x-cloak class="rounded-md p-1 text-sidebar-text hover:bg-white">
             <x-icon name="chevron-left" class="w-4 h-4" />
