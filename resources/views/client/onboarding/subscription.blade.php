@@ -181,8 +181,8 @@
     @endif
 
     <div class="mt-6 flex justify-end">
-        <a href="{{ route('client.dashboard') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark">
-            Go to Dashboard
+        <a href="{{ route('client.projects.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-dark">
+            Go to Projects
         </a>
     </div>
 </x-client-layout>

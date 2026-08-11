@@ -200,6 +200,33 @@ public function clientProduct(): BelongsTo
     }
 
     /**
+     * [count completed, total] course lesson videos for this project's
+     * product, counted against the client's shared progress (not
+     * project-scoped) — same shape as trainingProgressCount() but sourced
+     * from the newer Courses feature instead of the legacy ProductTraining videos.
+     */
+    public function courseLessonProgressCount(): array
+    {
+        $lessonIds = Course::where('product_id', $this->product_id)
+            ->where('is_published', true)
+            ->get()
+            ->flatMap(fn (Course $course) => $course->lessons->pluck('id'));
+
+        $total = $lessonIds->count();
+
+        if ($total === 0) {
+            return [0, 0];
+        }
+
+        $done = $this->client->courseLessonProgress()
+            ->whereIn('course_lesson_id', $lessonIds)
+            ->where('completed', true)
+            ->count();
+
+        return [$done, $total];
+    }
+
+    /**
      * Falls back to the client's own name when this brand has no
      * contact_name of its own set.
      */

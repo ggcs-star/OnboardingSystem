@@ -12,6 +12,7 @@ class ClientProduct extends Model
         'status',
         'assigned_by',
         'assigned_at',
+        'brand_slots',
     ];
 
     protected $casts = [
@@ -37,5 +38,15 @@ class ClientProduct extends Model
     public function assignedBy()
     {
         return $this->belongsTo(User::class,'assigned_by');
+    }
+
+    public function usedBrandSlots(): int
+    {
+        return $this->projects()->count();
+    }
+
+    public function hasAvailableBrandSlot(): bool
+    {
+        return $this->usedBrandSlots() < $this->brand_slots;
     }
 }

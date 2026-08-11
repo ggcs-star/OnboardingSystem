@@ -3,7 +3,7 @@
     $entries = $project->documentEntries();
     $statusCounts = $entries->countBy('status');
     [$docsDone, $docsTotal] = $project->documentsProgress();
-    [$videosDone, $videosTotal] = $project->trainingProgressCount();
+    [$videosDone, $videosTotal] = $project->courseLessonProgressCount();
     $overallTotal = $docsTotal + $videosTotal;
     $overallPct = $overallTotal > 0 ? (int) round((($docsDone + $videosDone) / $overallTotal) * 100) : 0;
     $lastActivity = $project->updated_at->isToday()
@@ -28,16 +28,16 @@
     <p class="text-sm text-secondary">{{ $project->brand_name ?? $project->project_name }}</p>
 
     <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <div class="rounded-xl border border-app-border bg-white p-5">
+        <div class="rounded-xl border border-primary/20 bg-primary-light p-5">
             <p class="text-xs font-medium uppercase tracking-wide text-secondary">Your Progress</p>
             <p class="mt-2 text-3xl font-semibold text-secondary-dark">{{ $overallPct }}%</p>
-            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-primary-light">
+            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/70">
                 <div class="h-2 rounded-full {{ $overallPct >= 100 ? 'bg-success' : 'bg-primary' }}" style="width: {{ $overallPct }}%"></div>
             </div>
             <p class="mt-2 text-xs text-secondary">Last updated: {{ $lastActivity }}</p>
         </div>
-        <x-stat-card label="Documents" value="{{ $docsDone }}/{{ $docsTotal }}" :badge="($docsTotal ? round($docsDone / $docsTotal * 100) : 0) . '%'" icon="file-text" />
-        <x-stat-card label="Training Videos" value="{{ $videosDone }}/{{ $videosTotal }}" :badge="($videosTotal ? round($videosDone / $videosTotal * 100) : 0) . '%'" icon="play-circle" />
+        <x-stat-card label="Documents" value="{{ $docsDone }}/{{ $docsTotal }}" :badge="($docsTotal ? round($docsDone / $docsTotal * 100) : 0) . '%'" icon="file-text" tint="teal" />
+        <x-stat-card label="Training Videos" value="{{ $videosDone }}/{{ $videosTotal }}" :badge="($videosTotal ? round($videosDone / $videosTotal * 100) : 0) . '%'" icon="play-circle" tint="violet" />
         <x-stat-card label="Pending" :value="$statusCounts->get('pending', 0)" icon="clock" tint="warning" />
         <x-stat-card label="Approved" :value="$statusCounts->get('approved', 0)" icon="check" tint="success" />
     </div>

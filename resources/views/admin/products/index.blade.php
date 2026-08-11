@@ -76,11 +76,23 @@
                     </div>
                 </div>
 
-                <a href="{{ route('admin.products.show', $product) }}"
-                    class="mt-2 inline-flex items-center justify-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-medium transition {{ $accent['button'] }}">
-                    <x-icon name="eye" class="w-4 h-4" />
-                    Manage Product
-                </a>
+                <div class="mt-2 flex items-center gap-2">
+                    <a href="{{ route('admin.products.show', $product) }}"
+                        class="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border bg-white px-2 py-2.5 text-sm font-medium transition {{ $accent['button'] }}">
+                        <x-icon name="eye" class="w-4 h-4 shrink-0" />
+                        Manage Product
+                    </a>
+                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="flex-1"
+                        onsubmit="return confirm('Delete this product and all of its projects, documents, training videos and settings? This cannot be undone.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="inline-flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border bg-white px-2 py-2.5 text-sm font-medium transition {{ $accent['button'] }}">
+                            <x-icon name="trash" class="w-4 h-4 shrink-0" />
+                            Delete Product
+                        </button>
+                    </form>
+                </div>
             </div>
         @empty
             <div class="col-span-full rounded-xl border border-dashed border-app-border bg-white p-10 text-center text-sm text-secondary">

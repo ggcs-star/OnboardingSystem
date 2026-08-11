@@ -50,6 +50,7 @@
                     <tr>
                         <th scope="col" class="px-6 py-4">Client Info</th>
                         <th scope="col" class="px-6 py-4">Product</th>
+                        <th scope="col" class="px-6 py-4">Description</th>
                         <th scope="col" class="px-6 py-4">Status</th>
                         <th scope="col" class="px-6 py-4">Date</th>
                     </tr>
@@ -70,17 +71,23 @@
                                         <span>•</span>
                                         <a href="tel:{{ $inquiry->phone }}" class="hover:text-primary hover:underline">{{ $inquiry->phone }}</a>
                                     </div>
-                                    @if ($inquiry->message)
-                                        <p class="mt-1.5 max-w-xs truncate text-xs text-secondary" title="{{ $inquiry->message }}">
-                                            {{ $inquiry->message }}
-                                        </p>
-                                    @endif
                                 </div>
                             </td>
 
                             <!-- Product -->
                             <td class="px-6 py-4 font-medium text-secondary-dark">
                                 {{ optional($inquiry->product)->name ?? 'N/A' }}
+                            </td>
+
+                            <!-- Description -->
+                            <td class="px-6 py-4">
+                                @if ($inquiry->message)
+                                    <p class="max-w-xs truncate text-xs text-secondary" title="{{ $inquiry->message }}">
+                                        {{ $inquiry->message }}
+                                    </p>
+                                @else
+                                    <span class="text-xs text-secondary/50">—</span>
+                                @endif
                             </td>
 
                             <!-- Changeable Status Dropdown -->
@@ -124,7 +131,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-sm text-secondary">
+                            <td colspan="5" class="px-6 py-12 text-center text-sm text-secondary">
                                 <div class="flex flex-col items-center justify-center">
                                     <x-icon name="inbox" class="mb-3 h-12 w-12 text-gray-300" />
                                     @if(request()->filled('search'))

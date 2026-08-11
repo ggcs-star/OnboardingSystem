@@ -31,12 +31,14 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $this->productService->createProduct(
+        $product = $this->productService->createProduct(
             $request->safe()->except('image'),
             $request->file('image')
         );
 
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
+        return redirect()
+            ->route('admin.products.show', ['product' => $product, 'tab' => 'document-fields'])
+            ->with('success', 'Product created successfully.');
     }
 
     public function show(Request $request, Product $product): View
@@ -76,5 +78,12 @@ class ProductController extends Controller
         return redirect()
             ->route('admin.products.show', ['product' => $product, 'tab' => 'product-details'])
             ->with('success', 'Product details updated.');
+    }
+
+    public function destroy(Product $product): RedirectResponse
+    {
+        $this->productService->deleteProduct($product);
+
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 }

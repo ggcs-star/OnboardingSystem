@@ -15,6 +15,7 @@ class BulkUpdateDocumentValuesRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'group' => ['nullable', 'string'],
             'fields' => ['nullable', 'array'],
             'fields.*.*' => ['nullable', 'string'],
             'files' => ['nullable', 'array'],
@@ -26,8 +27,13 @@ class BulkUpdateDocumentValuesRequest extends FormRequest
     {
         $validator->after(function (Validator $validator) {
             $project = $this->route('project');
+            $onlyGroup = $this->input('group');
 
             foreach ($project->documentEntries() as $entry) {
+                if ($onlyGroup !== null && $entry->group_slug !== $onlyGroup) {
+                    continue;
+                }
+
                 if (! $entry->group_mandatory || ! $entry->required) {
                     continue;
                 }

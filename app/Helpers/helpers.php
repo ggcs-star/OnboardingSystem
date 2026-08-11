@@ -120,9 +120,9 @@ if (! function_exists('support_ticket_category_badge')) {
     function support_ticket_category_badge(string $category): array
     {
         return match ($category) {
-            'training' => ['classes' => 'bg-primary-light text-primary', 'label' => 'Training Related'],
+            'training' => ['classes' => 'bg-chart-3/15 text-chart-3', 'label' => 'Training Related'],
             'complaint' => ['classes' => 'bg-danger-light text-danger', 'label' => 'Complaint'],
-            default => ['classes' => 'bg-warning-light text-warning', 'label' => 'Need Help'],
+            default => ['classes' => 'bg-chart-5/15 text-chart-5', 'label' => 'Need Help'],
         };
     }
 }
