@@ -80,7 +80,7 @@ class LmsArticleController extends Controller
 
         $path = $this->fileUploadService->store($request->file('file'), 'lms-articles');
 
-        return response()->json(['location' => asset('storage/' . $path)]);
+        return response()->json(['location' => '/storage/' . $path]);
     }
 
     public function reorderInCategory(Request $request, LmsCategory $lmsCategory): RedirectResponse

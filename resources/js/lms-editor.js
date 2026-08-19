@@ -25,6 +25,10 @@ if (textarea) {
         height: 500,
         menubar: false,
         branding: false,
+        paste_data_images: true,
+        automatic_uploads: true,
+        relative_urls: false,
+        convert_urls: false,
         images_upload_handler: (blobInfo) =>
             new Promise((resolve, reject) => {
                 const formData = new FormData();
@@ -40,6 +44,28 @@ if (textarea) {
         setup(editor) {
             editor.on('change', () => {
                 editor.save();
+            });
+
+            editor.on('init', () => {
+                const form = textarea.closest('form');
+                if (!form) return;
+
+                form.addEventListener('submit', (event) => {
+                    if (form.dataset.uploadsFlushed === '1') return;
+                    event.preventDefault();
+
+                    const submitter = event.submitter;
+                    if (submitter) submitter.disabled = true;
+
+                    editor.uploadImages()
+                        .catch(() => {})
+                        .then(() => {
+                            editor.save();
+                            form.dataset.uploadsFlushed = '1';
+                            if (submitter) submitter.disabled = false;
+                            form.requestSubmit ? form.requestSubmit(submitter) : form.submit();
+                        });
+                });
             });
         },
     });
