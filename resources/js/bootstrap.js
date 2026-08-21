@@ -10,6 +10,26 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /**
+ * If a background/AJAX request comes back as 401 (unauthenticated) or 419
+ * (CSRF/session expired) — most commonly because the tab was left open long
+ * enough for the session to expire — silently send the user to the login
+ * page instead of leaving them looking at a broken page or a console error.
+ */
+window.axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const status = error.response ? error.response.status : null;
+
+        if (status === 401 || status === 419) {
+            window.location.href = '/login';
+            return new Promise(() => {});
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+/**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allows your team to easily build robust real-time web applications.

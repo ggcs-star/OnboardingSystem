@@ -281,6 +281,12 @@
             <form method="POST" action="{{ route('login') }}" class="mt-8 sm:mt-10">
                 @csrf
 
+                @if (session('status'))
+                    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
                 @if ($errors->any())
                     <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
                         {{ $errors->first() }}
