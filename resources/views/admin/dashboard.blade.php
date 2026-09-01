@@ -54,18 +54,34 @@
     </div>
 
     <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
-        <x-stat-card label="Products" :value="$productStats['total']" :hint="$productStats['active'] . ' active'" tint="primary" icon="box" />
-        <x-stat-card label="Clients" :value="$clientStats['total']" :hint="$clientStats['active'] . ' active · ' . $clientStats['blocked'] . ' inactive'" tint="teal" icon="users" />
-        <x-stat-card label="Active Projects" :value="$projectStats['active_projects']" :hint="$projectStats['total_projects'] . ' total'" tint="success" icon="folder" />
-        <x-stat-card label="Documents Pending" :value="$projectStats['documents_pending']" hint="projects need attention" tint="warning" icon="file-text" />
-        <x-stat-card label="Open Tickets" :value="$projectStats['open_support_tickets']" hint="unresolved" tint="violet" icon="life-buoy" />
+        <a href="{{ route('admin.products.index') }}" class="block">
+            <x-stat-card label="Products" :value="$productStats['total']" :hint="$productStats['active'] . ' active'" tint="primary" icon="box" />
+        </a>
+        <a href="{{ route('admin.clients.index') }}" class="block">
+            <x-stat-card label="Clients" :value="$clientStats['total']" :hint="$clientStats['active'] . ' active · ' . $clientStats['blocked'] . ' inactive'" tint="teal" icon="users" />
+        </a>
+        <a href="{{ route('admin.projects.index') }}" class="block">
+            <x-stat-card label="Active Projects" :value="$projectStats['active_projects']" :hint="$projectStats['total_projects'] . ' total'" tint="success" icon="folder" />
+        </a>
+        <a href="{{ route('admin.documents.index', ['status' => 'pending']) }}" class="block">
+            <x-stat-card label="Documents Pending" :value="$projectStats['documents_pending']" hint="projects need attention" tint="warning" icon="file-text" />
+        </a>
+        <a href="{{ route('admin.support.index') }}" class="block">
+            <x-stat-card label="Open Tickets" :value="$projectStats['open_support_tickets']" hint="unresolved" tint="violet" icon="life-buoy" />
+        </a>
     </div>
 
     <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-stat-card label="Revenue This Month" :value="'₹' . number_format($renewalStats['revenue_this_month'], 0)" :hint="'₹' . number_format($renewalStats['revenue_total'], 0) . ' all-time'" tint="teal" icon="refresh-cw" />
-        <x-stat-card label="Pending Customizations" :value="$customizationCounts->get('pending', 0)" :hint="$customizationCounts->sum() . ' total requests'" tint="violet" icon="layers" />
-        <x-stat-card label="Quiz Answers to Grade" :value="$pendingQuizGrading" hint="text answers awaiting review" tint="warning" icon="help-circle" />
-        <x-stat-card label="New Inquiries" :value="$inquiryCounts->get('pending', 0)" :hint="$inquiryCounts->sum() . ' total inquiries'" tint="primary" icon="tag" />
+        <a href="{{ route('admin.customization-requests.index') }}" class="block">
+            <x-stat-card label="Pending Customizations" :value="$customizationCounts->get('pending', 0)" :hint="$customizationCounts->sum() . ' total requests'" tint="violet" icon="layers" />
+        </a>
+        <a href="{{ route('admin.course-quiz-answers.pending') }}" class="block">
+            <x-stat-card label="Quiz Answers to Grade" :value="$pendingQuizGrading" hint="text answers awaiting review" tint="warning" icon="help-circle" />
+        </a>
+        <a href="{{ route('admin.product.inquiry.index') }}" class="block">
+            <x-stat-card label="New Inquiries" :value="$inquiryCounts->get('pending', 0)" :hint="$inquiryCounts->sum() . ' total inquiries'" tint="primary" icon="tag" />
+        </a>
     </div>
 
     <div class="mt-6 rounded-xl border border-app-border bg-white">

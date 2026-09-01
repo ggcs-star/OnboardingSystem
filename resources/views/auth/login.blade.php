@@ -23,9 +23,8 @@
             background: #F8F4FB;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-            padding: 1.5rem;
         }
 
         .input-style {
@@ -97,9 +96,6 @@
         }
 
         @media (max-width: 1024px) {
-            body {
-                padding: 1rem;
-            }
             .left-heading {
                 font-size: 42px !important;
             }
@@ -176,10 +172,10 @@
 </head>
 <body>
 
-<div class="w-full max-w-7xl h-auto lg:h-[calc(100vh-48px)] flex flex-col lg:flex-row rounded-[28px] overflow-hidden bg-white shadow-2xl mx-auto">
+<div class="w-full h-auto lg:h-screen flex flex-col lg:flex-row overflow-hidden bg-white">
 
     <!-- ========== LEFT PANEL ========== -->
-    <div class="relative lg:flex lg:w-[58%] flex-col overflow-hidden px-6 sm:px-10 lg:px-14 pt-8 lg:pt-12 pb-0">
+    <div class="relative lg:flex lg:w-[60%] flex-col overflow-hidden px-6 sm:px-10 lg:px-14 pt-8 lg:pt-12 pb-0">
 
         <!-- Illustration — hue-shifted from its original blue toward the brand purple -->
         <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -189,12 +185,8 @@
 
         <!-- Logo -->
         <div class="relative z-10 flex items-center gap-3">
-            <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="21" cy="21" r="16" stroke="#692BB2" stroke-width="8" stroke-linecap="round"
-                        stroke-dasharray="82 18" transform="rotate(-38 21 21)"/>
-                <path d="M10.5 10.8 A16 16 0 0 1 15.5 6.8" stroke="#B48FDD" stroke-width="8" stroke-linecap="round"/>
-            </svg>
-            <span class="text-xl sm:text-2xl font-semibold tracking-[-0.3px] text-[#223B78]">Onboarding</span>
+            <img src="{{ asset('assets/images/logo-mark.png') }}" alt="Onboarding" class="h-16 w-16 sm:h-20 sm:w-20 object-contain" />
+            <span class="text-2xl sm:text-3xl font-semibold tracking-[-0.3px] text-[#223B78]">Onboarding</span>
         </div>
 
         <!-- Heading -->
@@ -260,8 +252,8 @@
     </div>
 
     <!-- ========== RIGHT PANEL (Login Card - UNCHANGED) ========== -->
-    <div class="w-full lg:w-[42%] flex items-center justify-center px-4 sm:px-6 py-10 lg:py-12 bg-[#F8FAFD]">
-        <div class="card-padding w-full max-w-[470px] bg-white rounded-[22px] border border-[#EDF1F7] shadow-[0_15px_50px_rgba(33,67,135,.08)] px-6 sm:px-10 py-8 sm:py-9">
+    <div class="w-full lg:w-[40%] flex items-center justify-center px-4 sm:px-6 py-10 lg:py-12 bg-white">
+        <div class="card-padding w-full max-w-[470px] px-6 sm:px-10 py-8 sm:py-9">
 
             <!-- Shield -->
             <div class="flex justify-center mt-2 mb-2">

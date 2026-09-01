@@ -46,23 +46,36 @@ class DocumentReviewController extends Controller
                 $client = $clientEntries->first()->project->client;
 
                 $products = $clientEntries
-                    ->groupBy(fn ($entry) => $entry->project->id)
-                    ->map(function ($projectEntries) {
-                        $project = $projectEntries->first()->project;
+                    ->groupBy(fn ($entry) => $entry->project->product_id)
+                    ->map(function ($productEntries) {
+                        $product = $productEntries->first()->project->product;
 
-                        $groups = $projectEntries
-                            ->groupBy('group_slug')
-                            ->map(fn ($groupEntries) => (object) [
-                                'label' => $groupEntries->first()->group_label,
-                                'mandatory' => $groupEntries->first()->group_mandatory,
-                                'entries' => $groupEntries->values(),
-                                'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
-                            ]);
+                        $brands = $productEntries
+                            ->groupBy(fn ($entry) => $entry->project->id)
+                            ->map(function ($projectEntries) {
+                                $project = $projectEntries->first()->project;
+
+                                $groups = $projectEntries
+                                    ->groupBy('group_slug')
+                                    ->map(fn ($groupEntries) => (object) [
+                                        'label' => $groupEntries->first()->group_label,
+                                        'mandatory' => $groupEntries->first()->group_mandatory,
+                                        'entries' => $groupEntries->values(),
+                                        'pending' => $groupEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                                    ]);
+
+                                return (object) [
+                                    'project' => $project,
+                                    'groups' => $groups,
+                                    'pending' => $projectEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                                ];
+                            })
+                            ->values();
 
                         return (object) [
-                            'project' => $project,
-                            'groups' => $groups,
-                            'pending' => $projectEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
+                            'product' => $product,
+                            'brands' => $brands,
+                            'pending' => $productEntries->whereIn('status', ['pending', 'submitted', 'rejected'])->count(),
                         ];
                     })
                     ->values();
