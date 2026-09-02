@@ -37,6 +37,9 @@
                 <x-sidebar-link :href="route('client.courses.index')" :active="request()->routeIs('client.courses.*') || request()->routeIs('client.course-*')" icon="video">
                     <span x-show="!collapsed" x-cloak>Courses</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('client.documents.index')" :active="request()->routeIs('client.documents.*')" icon="file-text">
+                    <span x-show="!collapsed" x-cloak>Documents</span>
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('client.customization-requests.index')" :active="request()->routeIs('client.customization-requests.*')" icon="settings">
                     <span x-show="!collapsed" x-cloak>Customization</span>
                 </x-sidebar-link>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CourseQuizQuestionController;
 use App\Http\Controllers\Admin\CourseQuizReviewController;
 use App\Http\Controllers\Admin\CustomizationRequestController;
 use App\Http\Controllers\Admin\CustomizationRequestOverviewController;
+use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\Admin\DocumentReviewController;
 use App\Http\Controllers\Admin\LmsArticleController;
 use App\Http\Controllers\Admin\LmsCategoryController;
@@ -169,6 +170,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::get('/course-quiz-answers/pending', [CourseQuizReviewController::class, 'index'])->name('course-quiz-answers.pending');
     Route::patch('/course-quiz-answers/{answer}/grade', [CourseQuizReviewController::class, 'grade'])->name('course-quiz-answers.grade');
+
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::put('/documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
+    Route::patch('/documents/{document}/publish', [DocumentController::class, 'togglePublish'])->name('documents.publish.toggle');
+    Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
     Route::get('/coming-soon/{label?}', function (?string $label = 'This section') {
         return view('admin.coming-soon', ['label' => $label]);

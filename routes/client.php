@@ -5,6 +5,7 @@ use App\Http\Controllers\Client\CourseLessonProgressController;
 use App\Http\Controllers\Client\CourseQuizAnswerController;
 use App\Http\Controllers\Client\CustomizationRequestController;
 use App\Http\Controllers\Client\DashboardController;
+use App\Http\Controllers\Client\DocumentController;
 use App\Http\Controllers\Client\DocumentValueController;
 use App\Http\Controllers\Client\LmsController;
 use App\Http\Controllers\Client\OnboardingController;
@@ -34,6 +35,8 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('client')->name('
     Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
     Route::post('/course-lessons/{courseLesson}/progress', [CourseLessonProgressController::class, 'update'])->name('course-lessons.progress.update');
     Route::post('/course-quiz-checkpoints/{checkpoint}/answers', [CourseQuizAnswerController::class, 'store'])->name('course-quiz-answers.store');
+
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
 
     Route::get('/lms', [LmsController::class, 'index'])->name('lms.index');
     Route::get('/lms/{lmsProduct}', [LmsController::class, 'product'])->name('lms.product');

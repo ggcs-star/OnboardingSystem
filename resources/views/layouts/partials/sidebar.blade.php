@@ -40,6 +40,9 @@
                 <x-sidebar-link :href="route('admin.courses.index')" :active="request()->routeIs('admin.courses.*') || request()->routeIs('admin.course-*')" icon="video">
                     <span x-show="!collapsed" x-cloak>Courses</span>
                 </x-sidebar-link>
+                <x-sidebar-link :href="route('admin.documents.index')" :active="request()->routeIs('admin.documents.*')" icon="file-text">
+                    <span x-show="!collapsed" x-cloak>Documents</span>
+                </x-sidebar-link>
                 <x-sidebar-link :href="route('admin.product.inquiry.index')" :active="request()->routeIs('admin.product-inquiry.*')" icon="help-circle">
                     <span x-show="!collapsed" x-cloak>Product Inquiries</span>
                 </x-sidebar-link>
